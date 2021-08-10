@@ -1,0 +1,62 @@
+#HyperV Components
+c:\windows\system32\vmms.exe
+c:\windows\system32\vmwp.exe
+c:\windows\system32\drivers\svhdxflt.sys
+c:\windows\system32\rdvgpuinfo.dll
+c:\windows\system32\drivers\vhdmp.sys
+c:\windows\system32\vmsp.exe
+c:\windows\system32\Vmicvss.dll
+c:\windows\system32\drivers\Vmswitch.sys
+c:\windows\system32\Hvix64.exe
+
+#SMB Components for CSV/Cluster
+c:\windows\system32\drivers\mrxsmb.sys
+c:\windows\system32\drivers\mrxsmb10.sys
+c:\windows\system32\drivers\mrxsmb20.sys
+c:\windows\system32\drivers\mup.sys
+c:\windows\system32\drivers\rdbss.sys
+c:\windows\system32\drivers\srv.sys
+c:\windows\system32\drivers\srv2.sys
+c:\windows\system32\drivers\srvnet.sys
+c:\windows\system32\srvsvc.dll
+
+#Cluster Components
+c:\windows\system32\drivers\netft.sys
+c:\windows\system32\drivers\Csvfs.sys
+c:\windows\system32\drivers\clusdisk.sys
+c:\windows\system32\Clusauthmgr.dll
+c:\windows\system32\wbem\Cluswmi.dll
+c:\windows\System32\Cprepsrv.exe
+c:\windows\cluster\Clussvc.exe
+c:\windows\cluster\Clusres.dll
+
+#OSCore & Net Components
+c:\windows\system32\drivers\Mslbfoprovider.sys
+c:\windows\system32\drivers\ndisimplatform.sys
+c:\windows\system32\drivers\afd.sys
+c:\windows\system32\drivers\ndis.sys
+c:\windows\system32\drivers\netbios.sys
+c:\windows\system32\drivers\netio.sys
+c:\windows\system32\drivers\tcpip.sys
+c:\Windows\System32\Ntoskrnl.exe
+c:\Windows\System32\drivers\Classpnp.sys
+c:\windows\system32\Nlasvc.dll
+c:\windows\system32\wbem\Wmisvc.dll
+c:\windows\system32\wbem\winmgmt.exe
+c:\windows\system32\wbem\Wmidcprv.dll
+c:\windows\system32\wbem\Wmiprvsd.dll
+c:\windows\system32\wbem\Wmiprov.dll
+c:\windows\system32\wbem\Wmiprvse.exe
+
+#Storage 
+c:\windows\system32\drivers\Ntfs.sys
+c:\windows\system32\drivers\StorPort.sys
+c:\windows\system32\drivers\Classpnp.sys
+c:\windows\system32\drivers\partmgr.sys
+c:\windows\system32\drivers\msdsm.sys
+c:\windows\system32\drivers\mpio.sys
+c:\windows\system32\drivers\Volsnap.sys
+
+#Hardware drivers
+c:\windows\system32\drivers\ixi63x64.sys
+c:\windows\system32\drivers\b57nd60a.sys
