@@ -126,7 +126,7 @@ Set-StrictMode -version Latest
 $ErrorActionPreference = "SilentlyContinue"
 
 #Script Version
-$sScriptVersion = "5.6"
+$sScriptVersion = "5.7"
 
 #Log File Info
 $sLogPath = $TargetFolder
