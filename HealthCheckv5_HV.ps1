@@ -466,6 +466,11 @@ Log-Finish -LogPath $sLogFile
             #If Output file exists, delete it to create a new one
             If (Test-Path $OutputLBFO) {Remove-Item $OutputLBFO -Force}
 
+            #File to write output for SETTEAM per Cluster
+            $OutputSETTEAM = "$TargetFolder\SETTEAM"+"_$cluster.csv"
+            #If Output file exists, delete it to create a new one
+            If (Test-Path $OutputSETTEAM) {Remove-Item $OutputSETTEAM -Force}
+
             #File to write output for NetAdapterHWInfo per Cluster
             $OutputNetHW = "$TargetFolder\NetHW"+"_$cluster.csv"
             #If Output file exists, delete it to create a new one
@@ -637,6 +642,13 @@ Log-Finish -LogPath $sLogFile
                     $LBFO += Get-NetLbfoTeam -CimSession $ClusterNode | Select-Object @{N="ComputerName";E={$ClusterNode}}, Name, Members, TeamNics, TeamingMode, LoadBalancingAlgorithm, Status
                     $LBFO | Export-Csv -Path $OutputLBFO -Append -NoTypeInformation
                     #Ending LBFO/TEAM Export
+
+                    #Starting SET/TEAM Export
+                    Log-write -LogPath $sLogFile -LineValue "  Collecting SETTEAM info for $Clusternode..."
+                    $SET = @()               
+                    $SET += Get-VMSwitchTeam -CimSession $ClusterNode | Select-Object @{N="ComputerName";E={$ClusterNode}}, Name, Id, NetAdapterInterfaceDescription, TeamingMode, LoadBalancingAlgorithm
+                    $SET | Export-Csv -Path $OutputSETTEAM -Append -NoTypeInformation
+                    #Ending SET/TEAM Export
 
                     #Starting vNIC Export
                     Log-write -LogPath $sLogFile -LineValue "  Collecting vNIC info for $Clusternode..."
