@@ -652,9 +652,9 @@ Log-Finish -LogPath $sLogFile
 
                     #Starting vNIC Export
                     Log-write -LogPath $sLogFile -LineValue "  Collecting vNIC info for $Clusternode..."
-                    $LBFO = @()               
-                    $LBFO += Get-VMNetworkAdapter -ManagementOS -CimSession $ClusterNode | Select-Object @{N="ComputerName";E={$ClusterNode}}, Name, vr*,vmq*, vmmq*
-                    $LBFO | Export-Csv -Path $OutputvNIC -Append -NoTypeInformation
+                    $vNIC = @()               
+                    $vNIC += Get-VMNetworkAdapter -ManagementOS -CimSession $ClusterNode | Select-Object @{N="ComputerName";E={$ClusterNode}}, Name, vr*,vmq*, vmmq*
+                    $vNIC | Export-Csv -Path $OutputvNIC -Append -NoTypeInformation
                     #Ending vNIC Export
                     
                     #START Storage configuration collection
