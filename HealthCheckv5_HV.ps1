@@ -70,9 +70,12 @@ Standalone nodes are not supported.
  Per Cluster nodes MPIO & HBA health stats
  
 Pending:
-Events entries for Storage/PnP/Storport
-SET Team data
+CSV State
+RDMA
+QoS (PFC, ETS, QoS)
 Virtual Disk And Physical Disk Data (S2D)
+delayed
+Events entries for Storage/PnP/Storport
 Per Cluster nodes MPIO & MSDSM settings
 
 
@@ -565,39 +568,46 @@ Log-Finish -LogPath $sLogFile
                     Log-write -LogPath $sLogFile -LineValue "  Collecting Failover Cluster events for $Clusternode..."
                   
                     #Event Level 1 = Critical, Level 2 = Error, 3 = Warning, 4 = Info (https://msdn.microsoft.com/en-us/library/aa394226(v=vs.85).aspx)
-                    #SYSTEM
-                    $Events = $null
-                    $Events += Get-WinEvent -Oldest -ComputerName $ClusterNode -FilterHashtable @{LogName='system'; Level=[int]1; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
-                    $Events += Get-WinEvent -Oldest -ComputerName $ClusterNode -FilterHashtable @{LogName='system'; Level=[int]2; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
-                    $Events += Get-WinEvent -Oldest -ComputerName $ClusterNode -FilterHashtable @{LogName='system'; Level=[int]3; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
-                    #HV
-                    $Events += Get-WinEvent -Oldest -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Compute-Admin'; Level=[int]3; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
-                    $Events += Get-WinEvent -Oldest -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Compute-Admin'; Level=[int]2; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
-                    $Events += Get-WinEvent -Oldest -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Compute-Admin'; Level=[int]1; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
-                    
-                    $Events += Get-WinEvent -Oldest -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Config-Admin'; Level=[int]3; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
-                    $Events += Get-WinEvent -Oldest -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Config-Admin'; Level=[int]2; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
-                    $Events += Get-WinEvent -Oldest -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Config-Admin'; Level=[int]1; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
-
-                    $Events += Get-WinEvent -Oldest -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Guest-Drivers/Admin'; Level=[int]3; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
-                    $Events += Get-WinEvent -Oldest -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Guest-Drivers/Admin'; Level=[int]2; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
-                    $Events += Get-WinEvent -Oldest -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Guest-Drivers/Admin'; Level=[int]1; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
-
-                    $Events += Get-WinEvent -Oldest -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Hypervisor-Admin'; Level=[int]3; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
-                    $Events += Get-WinEvent -Oldest -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Hypervisor-Admin'; Level=[int]2; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
-                    $Events += Get-WinEvent -Oldest -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Hypervisor-Admin'; Level=[int]1; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
-                    
-                    $Events += Get-WinEvent -Oldest -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-VMMS-Admin'; Level=[int]3; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
-                    $Events += Get-WinEvent -Oldest -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-VMMS-Admin'; Level=[int]2; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
-                    $Events += Get-WinEvent -Oldest -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-VMMS-Admin'; Level=[int]1; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
-                    
-                    $Events += Get-WinEvent -Oldest -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Worker-Admin'; Level=[int]3; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
-                    $Events += Get-WinEvent -Oldest -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Worker-Admin'; Level=[int]2; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
-                    $Events += Get-WinEvent -Oldest -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Worker-Admin'; Level=[int]1; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
-                    #Cluster
-                    $Events += Get-WinEvent -Oldest -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-FailoverClustering/Operational'; Level=[int]4; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
-                 
-                    $Events| Select-Object MachineName,LogName,LevelDisplayName,Id,ProviderName,RecordId,Message,ProcessId,ThreadId,UserId,TimeCreated | Export-Csv -Path $OutputEvents -Append -NoTypeInformation
+                        #SYSTEM
+                        $Events = $null
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='system'; Level=[int]1; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='system'; Level=[int]2; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='system'; Level=[int]3; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        #HV
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Compute-Admin'; Level=[int]3; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Compute-Admin'; Level=[int]2; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Compute-Admin'; Level=[int]1; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue              
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Config-Admin'; Level=[int]3; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Config-Admin'; Level=[int]2; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Config-Admin'; Level=[int]1; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Guest-Drivers/Admin'; Level=[int]3; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Guest-Drivers/Admin'; Level=[int]2; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Guest-Drivers/Admin'; Level=[int]1; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Hypervisor-Admin'; Level=[int]3; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Hypervisor-Admin'; Level=[int]2; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Hypervisor-Admin'; Level=[int]1; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue                        
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-VMMS-Admin'; Level=[int]3; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-VMMS-Admin'; Level=[int]2; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-VMMS-Admin'; Level=[int]1; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue                        
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Worker-Admin'; Level=[int]3; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Worker-Admin'; Level=[int]2; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-Hyper-V-Worker-Admin'; Level=[int]1; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        #SMB
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-SmbClient/Connectivity'; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-SMBClient/Operational'; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-SmbClient/Security'; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-SMBServer/Connectivity'; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-SMBServer/Operational'; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-SMBServer/Security'; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue                       
+                        #Cluster
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-FailoverClustering/Operational'; Level=[int]4; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
+                        #S2D
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='microsoft-windows-storagespaces-spacemanager/operational'; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue         
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='microsoft-windows-storagespaces-spacemanager/diagnostic'; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue         
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='microsoft-windows-storagespaces-driver/operational'; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue         
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='microsoft-windows-storagespaces-driver/diagnostic'; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue    
+                        #Export the eventlogs
+                        $Events| Select-Object MachineName,LogName,LevelDisplayName,Id,ProviderName,RecordId,Message,ProcessId,ThreadId,UserId,TimeCreated | Export-Csv -Path $OutputEvents -Append -NoTypeInformation
                     #End Cluster Events export inside the cluster loop
 
                     #START Windows Features
