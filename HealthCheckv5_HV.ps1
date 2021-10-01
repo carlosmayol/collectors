@@ -92,7 +92,7 @@ Param(
       [switch]$CollectEvents, #Boolean parameter to Define event collection
       [Parameter (ParameterSetName = 'EventDates', Mandatory=$false)]
       [DateTime]$EventStart, #Parameter to define Start Event log date
-      [Parameter (ParameterSetName = 'EventDates', Mandatory=$true)]
+      [Parameter (ParameterSetName = 'EventDates', Mandatory=$false)]
       [ValidateScript({$_ -le (Get-Date)})]
       [DateTime]$EventEnd  #Parameter to define End Event log date
       )
