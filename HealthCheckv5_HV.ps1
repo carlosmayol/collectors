@@ -88,8 +88,7 @@ Param(
       [switch]$CollectS2DHealthLogs, #Boolean parameter to define if we collect Health clusterlogs
       [switch]$CollectConfigInfo, #Boolean parameter to define if we collect clusterlogs     
       [switch]$CollectDiskHistory, #Boolean parameter to define if we collect Disk History Events (time consuming)
- 
-      [Parameter(ParameterSetName = 'CollectEvents')][switch]$CollectEvents,#Boolean parameter to Define event collection
+      [switch]$CollectEvents,#Boolean parameter to Define event collection
       [Parameter (ParameterSetName = 'EventDates', Mandatory=$true)][DateTime]$EventStart, #Parameter to define Start Event log date
       [Parameter (ParameterSetName = 'EventDates', Mandatory=$true)][DateTime]$EventEnd  #Parameter to define End Event log date
 
