@@ -79,6 +79,7 @@ Run the script to collect Events only
 
 #----------------------------------------------------------[Declarations]----------------------------------------------------------
 
+[CmdletBinding(DefaultParametersetName='None')] 
 Param(      
       [string]$TargetFolder, #Parameter to define target location of result csv files, default C:\temp\$date
       [string]$Clusters=".\Clusters.txt", #TXT containing the list of cluster Names to collect cluster information, default .\clusters.txt
@@ -87,12 +88,11 @@ Param(
       [switch]$CollectS2DHealthLogs, #Boolean parameter to define if we collect Health clusterlogs
       [switch]$CollectConfigInfo, #Boolean parameter to define if we collect clusterlogs     
       [switch]$CollectDiskHistory, #Boolean parameter to define if we collect Disk History Events (time consuming)
-      [Parameter()]
-      [switch]$CollectEvents, #Boolean parameter to define if we collect event logs only
-      [Parameter(ParameterSetName = 'CollectEvents')]
-      [ValidateScript({$CollectEvents})]
-      [DateTime]$EventStart, #Parameter to define Start Event log date
-      [DateTime]$EventEnd #Parameter to define End Event log date
+ 
+      [Parameter(ParameterSetName = 'CollectEvents')][switch]$CollectEvents,#Boolean parameter to 
+      [Parameter (ParameterSetName = 'CollectEvents', Mandatory=$true)][DateTime]$EventStart, #Parameter to define Start Event log date
+      [Parameter (ParameterSetName = 'CollectEvents', Mandatory=$true)][DateTime]$EventEnd  #Parameter to define End Event log date
+
       )
  
 #Get current date/time
