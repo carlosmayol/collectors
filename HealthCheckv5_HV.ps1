@@ -90,9 +90,9 @@ Param(
       [switch]$CollectDiskHistory, #Boolean parameter to define if we collect Disk History Events (time consuming)
       [switch]$CollectEvents,#Boolean parameter to Define event collection
       [Parameter (ParameterSetName = 'EventDates', Mandatory=$true)]
-      [ValidateScript ({if($CollectEvents){}})]
+      [ValidateScript ({$CollectEvents})]
       [DateTime]$EventStart, #Parameter to define Start Event log date
-      [Parameter (ParameterSetName = 'EventDates', Mandatory=$true)][DateTime]$EventEnd  #Parameter to define End Event log date
+      [DateTime]$EventEnd  #Parameter to define End Event log date
 
       )
  
