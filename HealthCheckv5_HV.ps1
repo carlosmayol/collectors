@@ -70,7 +70,7 @@ Changelog:
 
 .EXAMPLE
 Run the script to collect Events and configuration information only
-  Powershell.exe -file "[Path]\healthcheckv5.ps1" -CollectConfigInfo
+  Powershell.exe -file "[Path]\healthcheckv5.ps1" -CollectEvents -CollectConfigInfo
 
 Run the script to collect Events only 
   Powershell.exe -file "[Path]\healthcheckv5.ps1" -CollectEvents
@@ -206,18 +206,19 @@ $OutputCluster09 = "$TargetFolder\Cluster-net.csv"; If (Test-Path $OutputCluster
 $OutputCluster10 = "$TargetFolder\Cluster-netint.csv"; If (Test-Path $OutputCluster10) {Remove-Item $OutputCluster -Force}
 $OutputCluster11 = "$TargetFolder\Cluster-access.csv"; If (Test-Path $OutputCluster11) {Remove-Item $OutputCluster -Force}
 $OutputEvents = "$TargetFolder\EventInfo.csv"; If (Test-Path $OutputEvents) {Remove-Item $OutputEvents -force}
-$OutputWinFeats = "$TargetFolder\WindowsFeats.csv"; If (Test-Path $OutputWinFeats) {Remove-Item $OutputWinFeats -force}
-$OutputNetFDrivers = "$TargetFolder\NetDrivers.csv"; If (Test-Path $OutputNetFDrivers) {Remove-Item $OutputNetFDrivers -force}
+$OutputHotfixes = "$TargetFolder\Hotfixes.csv"; If (Test-Path $OutputHotfixes) {Remove-Item $OutputHotfixes -Force}
 $OutputFiles = "$TargetFolder\Files.csv.csv"; If (Test-Path $OutputFiles) {Remove-Item $OutputFiles -Force}
+$OutputWinFeats = "$TargetFolder\WindowsFeats.csv"; If (Test-Path $OutputWinFeats) {Remove-Item $OutputWinFeats -force}
+$OutputNetDrivers = "$TargetFolder\NetDrivers.csv"; If (Test-Path $OutputNetDrivers) {Remove-Item $OutputNetDrivers -force}
 $OutputLBFO = "$TargetFolder\LBFO.csv"; If (Test-Path $OutputLBFO) {Remove-Item $OutputLBFO -Force}
 $OutputSET = "$TargetFolder\SET.csv"; If (Test-Path $OutputSET) {Remove-Item $OutputSET -Force}
-$OutputNetHW = "$TargetFolder\NetHW"+"_$cluster.csv"; If (Test-Path $OutputNetHW) {Remove-Item $OutputNetHW -Force}
-$OutputNetAdvProp = "$TargetFolder\NetAdvProp"+"_$cluster.csv"; If (Test-Path $OutputNetAdvProp) {Remove-Item $OutputNetAdvProp -Force}
-$OutputvNIC = "$TargetFolder\NetvNIC"+"_$cluster.csv"; If (Test-Path $OutputvNIC) {Remove-Item $OutputvNIC -Force}
-$OutputMPIO = "$TargetFolder\MPIOData"+"_$cluster.csv"; If (Test-Path $OutputMPIO) {Remove-Item $OutputMPIO -Force}
-$OutputHBA = "$TargetFolder\HBAData"+"_$cluster.csv"; If (Test-Path $OutputHBA) {Remove-Item $OutputHBA -Force}
-$OutputMPIOSettings = "$TargetFolder\MPIOSettings"+"_$cluster.csv"; If (Test-Path $OutputLBFO) {Remove-Item $OutputMPIOSettings -Force}
-$OutputHotfixes = "$TargetFolder\Hotfixes"+"_$cluster.csv"; If (Test-Path $OutputHotfixes) {Remove-Item $OutputHotfixes -Force}
+$OutputNetHW = "$TargetFolder\NetHW.csv"; If (Test-Path $OutputNetHW) {Remove-Item $OutputNetHW -Force}
+$OutputNetAdvProp = "$TargetFolder\NetAdvProp.csv"; If (Test-Path $OutputNetAdvProp) {Remove-Item $OutputNetAdvProp -Force}
+$OutputvNIC = "$TargetFolder\NetvNIC.csv"; If (Test-Path $OutputvNIC) {Remove-Item $OutputvNIC -Force}
+$OutputMPIO = "$TargetFolder\MPIOData.csv"; If (Test-Path $OutputMPIO) {Remove-Item $OutputMPIO -Force}
+$OutputHBA = "$TargetFolder\HBAData.csv"; If (Test-Path $OutputHBA) {Remove-Item $OutputHBA -Force}
+$OutputMPIOSettings = "$TargetFolder\MPIOSettings.csv"; If (Test-Path $OutputLBFO) {Remove-Item $OutputMPIOSettings -Force}
+$OutputDiskHistory = "$TargetFolder\DiskHistory.csv"; If (Test-Path $OutputDiskHistory) {Remove-Item $OutputDiskHistory -Force}
         
 #### END Output files init
 
@@ -238,15 +239,14 @@ $OutputHotfixes = "$TargetFolder\Hotfixes"+"_$cluster.csv"; If (Test-Path $Outpu
     #Iterate through each Cluster in $ClusterList and run commands below
     ForEach ($cluster in $ClusterList)
     {
+        #Progress Bar artifact 
+        Write-Progress -Activity CLUSTERS -Status 'Progress->' -PercentComplete ($I/$ClusterList.Count*100)
 
         If (Test-Connection -ComputerName $cluster -count 1 -Quiet)
         {
             Write-Verbose ("Exporting Cluster settings for $cluster...") -Verbose
             Write-Host ""
             Log-Write -LogPath $sLogFile -LineValue "Exporting Cluster settings for $cluster..." 
-
-            #Progress Bar artifact 
-            Write-Progress -Activity CLUSTERS -Status 'Progress->' -PercentComplete ($I/$ClusterList.Count*100)
 
             #Preparing artifacts for Cluster & Cluster Nodes collection
             #Getting Cluster domain
@@ -321,14 +321,13 @@ $OutputHotfixes = "$TargetFolder\Hotfixes"+"_$cluster.csv"; If (Test-Path $Outpu
             Write-Progress -id 1 -Activity Nodes -Status 'Progress->' -PercentComplete ($P/$ClusterSrvNodes.Count*100)
 
             #Binding ClusterNode & Cluster Domain to have FQDN naming
-            $Clusternode = "$ClusterNode"+"."+"$clusterdomain"           
+            $ClusterNode = "$ClusterNode"+"."+"$clusterdomain"           
             
             if (Test-Connection $ClusterNode -count 1 -Quiet) 
                 { 
                     Write-Verbose ("Server: $ClusterNode") -Verbose
                     Write-Host ""
                     Log-write -LogPath $sLogFile -LineValue " Processing $ClusterNode ...." 
-
 
                     if ($CollectEvents) 
                     {
@@ -382,7 +381,7 @@ $OutputHotfixes = "$TargetFolder\Hotfixes"+"_$cluster.csv"; If (Test-Path $Outpu
                         $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='microsoft-windows-storagespaces-driver/diagnostic'; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue    
                         #Export the eventlogs
                         $Events | Select-Object @{N="Cluster";E={$Cluster}}, MachineName,LogName,LevelDisplayName,Id,ProviderName,RecordId,Message,ProcessId,ThreadId,UserId,TimeCreated | Export-Csv -Path $OutputEvents -Append -NoTypeInformation
-                    #End Cluster Events export inside the cluster loop
+                    
                     } #end collectEvents
 
                     if ($CollectConfigInfo)
@@ -394,8 +393,10 @@ $OutputHotfixes = "$TargetFolder\Hotfixes"+"_$cluster.csv"; If (Test-Path $Outpu
                         Write-Host ""
 
                         # HOST config
+                        #Get-computerinfo
                         Get-WindowsFeature -ComputerName $ClusterNode | Where-Object installed | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, Name, DisplayName, FeatureType  | Export-Csv -Path $OutputWinFeats -Append -NoTypeInformation
-                        
+                        Get-HotFix -ComputerName $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, Description, HotFixID, InstalledBy, InstalledOn  | Export-csv -Path $OutputHotfixes -Append -NoTypeInformation
+
                         # HOST Network
                         Get-Netadapter -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, Name, DriverName, DriverVersion, DriverDate, DriverDescription, DriverProvider | Export-Csv -Path $OutputNetFDrivers -Append -NoTypeInformation                    
                         Get-NetAdapter -CimSession $ClusterNode | Where-Object {$_.ifOperStatus -eq "Up"} | Get-NetAdapterAdvancedProperty  | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, Name, DisplayName, DisplayValue, RegistryKeyword, RegistryKeyword | Export-Csv -Path $OutputNetAdvProp -Append -NoTypeInformation
@@ -403,22 +404,19 @@ $OutputHotfixes = "$TargetFolder\Hotfixes"+"_$cluster.csv"; If (Test-Path $Outpu
                         Get-NetLbfoTeam -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, Name, Members, TeamNics, TeamingMode, LoadBalancingAlgorithm, Status | Export-Csv -Path $OutputLBFO -Append -NoTypeInformation
                         Get-VMSwitchTeam -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, Name, Id, NetAdapterInterfaceDescription, TeamingMode, LoadBalancingAlgorithm | Export-Csv -Path $OutputSET -Append -NoTypeInformation            
                         Get-VMNetworkAdapter -ManagementOS -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, Name, vr*,vmq*, vmmq* | Export-Csv -Path $OutputvNIC -Append -NoTypeInformation
+                        Get-VMSwitch -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, *
 
                         # HOST Block Storage        
                         $MPIOStatistics = Invoke-Command -ComputerName $ClusterNode -ScriptBlock {Get-WMIObject -NameSpace "root/wmi" -Class "MPIO_DISK_HEALTH_INFO" | Select-Object -Expand DiskHealthPackets} | Select-Object @{N="Cluster";E={$Cluster}},@{L="ComputerName";E={$ClusterNode}}, Name, NumberReads, NumberWrites, PathFailures, NumberIoErrors, NumberRetries | Sort-Object ComputerName, Name
                         $HBAStatistics = Invoke-Command -ComputerName $ClusterNode -ScriptBlock {Get-WMIObject -NameSpace "root/wmi" -Class "MSFC_FibrePortHBAStatistics" | Select-Object -Expand Statistics} | Select-Object @{N="Cluster";E={$Cluster}},@{L="ComputerName";E={$ClusterNode}}, DumpedFrames, ErrorFrames, InvalidCRCCount, InvalidTxWordCount, LinkFailureCount, LIPCount, LossOfSignalCount, LossOfSyncCount, NOSCount, SecondsSinceLastReset | Sort-Object ComputerName, InvalidTxWordCount
                         $MPIOStatistics | Export-Csv -Path $OutputMPIO -Append -NoTypeInformation
-                        $HBAStatistics | Export-Csv -Path $OutputHBA -Append -NoTypeInformation
-                        #[CM] MPIO is not working...         
-                        $MPIOSettings = Invoke-Command -ComputerName $ClusterNode -ScriptBlock {Get-MPIOSetting -CimSession $ClusterNode } | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, PathVerificationState, PathVericationPeriod, PDORemovePeriod, RetryCount, RetryInterval, UseCustomPathRecoveryTime, CustomPathRecoveryTime, DiskTimeoutValue
+                        $HBAStatistics | Export-Csv -Path $OutputHBA -Append -NoTypeInformation        
+                        $MPIOSettings = Invoke-Command -ComputerName $ClusterNode -ScriptBlock {Get-MPIOSetting | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}},PathVerificationState, PathVericationPeriod, PDORemovePeriod, RetryCount, RetryInterval, UseCustomPathRecoveryTime, CustomPathRecoveryTime, DiskTimeoutValue
                         $MPIOSettings | Export-Csv -Path $OutputMPIOSettings -Append -NoTypeInformation
-
-                        #Starting remote PSSession for FileVersion Export
-                        Write-Host "Starting File version collection..." -ForegroundColor Cyan
-                        Write-Host ""
-                        Write-Host ""
-                        Log-Write -LogPath $sLogFile -LineValue "Starting File version collection..."
-                
+                        $diskhistory = Invoke-Command -ComputerName $ClusterNode -ScriptBlock  {Get-PhysicalDisk  | Get-StorageHistory -NumberOfHours 168} | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}},FriendlyName,SerialNumber,FirmwareRevision,DeviceNumber,MediaType,StartTime,EndTime,TotalIoCount,SuccessIoCount,FailedIoCount,AvgIoLatency,TotalErrors,BucketIoPercent 
+                        $diskhistory | Export-Csv -Path $OutputDiskHistory -Append -NoTypeInformation 
+                        
+                        #HOST remote PSSession for FileVersion                
                         $session = New-PSSession -ComputerName $ClusterNode
                         Invoke-Command -Session $session -ArgumentList @($files) -ScriptBlock {
                                             
@@ -450,28 +448,18 @@ $OutputHotfixes = "$TargetFolder\Hotfixes"+"_$cluster.csv"; If (Test-Path $Outpu
                         
                         } #End Remote ScriptBlock
 
-                        #Collection the results of the previous commands to retreive the information to the local system
+                        ##HOST remote PSSession for FileVersion -> Collection the results into the local system
                         $filesresult = Invoke-Command -session $session -ScriptBlock {$fileinfo}
                         $filesresult | Where-Object {$_} | Export-Csv -Path $OutputFiles -Append -NoTypeInformation
                         Remove-PSSession -Session $session
-                        #Finishing remote PSSession for FileVersion Export
-                        #End FileVersion Export process inside the cluster loop
 
-                        #Starting Hotfixes collection process Part I (inside the cluster loop)
-                        Write-Host "Starting KBs collection..." -ForegroundColor Cyan
-                        Write-Host ""
-                        Write-Host ""
-                        Log-write -LogPath $sLogFile -LineValue "Starting KBs collection..."
-                        $Hotfixes = Get-HotFix -ComputerName $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, Description, HotFixID, InstalledBy, InstalledOn
-                        $Hotfixes | Export-csv -Path $OutputHotfixes -Append -NoTypeInformation
-                        #End Hotfixes collection
-                    
+
                     } #end collectconfiginfo
 
                     #Progress Bar artifact 
                     $P = $P +1
 
-                 } #EndIf Node is respoding, if not skip to next
+                } #EndIf Node is respoding, if not skip to next
  
             else #ClusterNode is not respoding, we write output and write log and go next
                 {
@@ -486,7 +474,7 @@ $OutputHotfixes = "$TargetFolder\Hotfixes"+"_$cluster.csv"; If (Test-Path $Outpu
         } #EndIf CLUSTER is respoding, if not skip to next
 
        
-        Else #CLUSTER is not respoding, write output and error in log and go next
+        else #CLUSTER is not respoding, write output and error in log and go next
         {
             Write-Host "Connection to"$Cluster "does not work properly! going to next one ...." -ForegroundColor "red"
             Write-Host ""
