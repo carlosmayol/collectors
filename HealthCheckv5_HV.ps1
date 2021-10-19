@@ -89,7 +89,7 @@ Param(
       [switch]$CollectS2DHealthLogs, #Boolean parameter to define if we collect Health clusterlogs
       [switch]$CollectConfigInfo, #Boolean parameter to define if we collect clusterlogs     
       [switch]$CollectDiskHistory, #Boolean parameter to define if we collect Disk History Events (time consuming)
-      [switch]$CollectEvents, #Boolean parameter to Define event collection
+      [switch]$CollectEvents, ##Boolean parameter to define if we collect Windows eventlogs
       [Parameter (ParameterSetName = 'EventDates', Mandatory=$false)]
       [DateTime]$EventStart, #Parameter to define Start Event log date
       [Parameter (ParameterSetName = 'EventDates', Mandatory=$false)]
@@ -121,7 +121,7 @@ Set-StrictMode -version Latest
 $ErrorActionPreference = "SilentlyContinue"
 
 #Script Version
-$sScriptVersion = "5.7"
+$sScriptVersion = "6.0"
 
 #Log File Info
 $sLogPath = $TargetFolder
@@ -212,26 +212,27 @@ $OutputCluster09 = "$TargetFolder\Cluster-net.csv"; If (Test-Path $OutputCluster
 $OutputCluster10 = "$TargetFolder\Cluster-netint.csv"; If (Test-Path $OutputCluster10) {Remove-Item $OutputCluster -Force}
 $OutputCluster11 = "$TargetFolder\Cluster-access.csv"; If (Test-Path $OutputCluster11) {Remove-Item $OutputCluster -Force}
 $OutputEvents = "$TargetFolder\EventInfo.csv"; If (Test-Path $OutputEvents) {Remove-Item $OutputEvents -force}
+$OutputComputerinfo = "$TargetFolder\Computerinfo.csv"; If (Test-Path $OutputComputerinfo) {Remove-Item $OutputComputerinfo -force}
 $OutputHotfixes = "$TargetFolder\Hotfixes.csv"; If (Test-Path $OutputHotfixes) {Remove-Item $OutputHotfixes -Force}
 $OutputFiles = "$TargetFolder\Files.csv.csv"; If (Test-Path $OutputFiles) {Remove-Item $OutputFiles -Force}
 $OutputWinFeats = "$TargetFolder\WindowsFeats.csv"; If (Test-Path $OutputWinFeats) {Remove-Item $OutputWinFeats -force}
-$OutputNetDrivers = "$TargetFolder\NetDrivers.csv"; If (Test-Path $OutputNetDrivers) {Remove-Item $OutputNetDrivers -force}
+$OutputNetAdapters = "$TargetFolder\NetDrivers.csv"; If (Test-Path $OutputNetAdapters) {Remove-Item $OutputNetAdapters -force}
+$OutputNetAdpRSS = "$TargetFolder\NetDrivers.csv"; If (Test-Path $OutputNetAdpRSS) {Remove-Item $OutputNetAdpRSS -force}
+$OutputNetAdpRDMA = "$TargetFolder\NetDrivers.csv"; If (Test-Path $OutputNetAdpRDMA) {Remove-Item $OutputNetAdpRDMA -force}
+OutputNetAdpRSS
+OutputNetAdpRDMA
 $OutputNetHW = "$TargetFolder\NetHW.csv"; If (Test-Path $OutputNetHW) {Remove-Item $OutputNetHW -Force}
 $OutputNetAdvProp = "$TargetFolder\NetAdvProp.csv"; If (Test-Path $OutputNetAdvProp) {Remove-Item $OutputNetAdvProp -Force}
 $OutputLBFO = "$TargetFolder\LBFO.csv"; If (Test-Path $OutputLBFO) {Remove-Item $OutputLBFO -Force}
 $OutputSET = "$TargetFolder\SET.csv"; If (Test-Path $OutputSET) {Remove-Item $OutputSET -Force}
 $OutputvNIC = "$TargetFolder\NetvNIC.csv"; If (Test-Path $OutputvNIC) {Remove-Item $OutputvNIC -Force}
 $OutputVMSwith = "$TargetFolder\VMSwitch.csv"; If (Test-Path $OutputVMSwith) {Remove-Item $OutputVMSwith -Force}
-$Outputphysicaldisk = "$TargetFolder\DiskHistory.csv"; If (Test-Path $Outputphysicaldisk) {Remove-Item $Outputphysicaldisk -Force}
+$OutputPhysicaldisk = "$TargetFolder\PhysicalDisk.csv"; If (Test-Path $OutputPhysicaldisk) {Remove-Item $OutputPhysicaldisk -Force}
 $OutputDiskHistory = "$TargetFolder\DiskHistory.csv"; If (Test-Path $OutputDiskHistory) {Remove-Item $OutputDiskHistory -Force}
 $OutputMPIO = "$TargetFolder\MPIOData.csv"; If (Test-Path $OutputMPIO) {Remove-Item $OutputMPIO -Force}
 $OutputHBA = "$TargetFolder\HBAData.csv"; If (Test-Path $OutputHBA) {Remove-Item $OutputHBA -Force}
-$OutputMPIOSettings = "$TargetFolder\MPIOSettings.csv"; If (Test-Path $OutputLBFO) {Remove-Item $OutputMPIOSettings -Force}
-
-
-
-
-        
+$OutputMPIOSettings = "$TargetFolder\MPIOSettings.csv"; If (Test-Path $OutputMPIOSettings) {Remove-Item $OutputMPIOSettings -Force}
+       
 #### END Output files init
 
 ##### START CLUSTER LOOP ######################################################################
@@ -404,14 +405,17 @@ $OutputMPIOSettings = "$TargetFolder\MPIOSettings.csv"; If (Test-Path $OutputLBF
                         Write-Host ""
                         Write-Host ""
 
-                        # HOST config
-                        #Get-computerinfo
+                        # HOST Info
+                        $Computerinfo = Invoke-Command -ComputerName $ClusterNode -ScriptBlock  {Get-computerinfo} | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}},*
+                        $Computerinfo | Export-Csv -Path $OutputComputerinfo -Append -NoTypeInformation 
                         Get-WindowsFeature -ComputerName $ClusterNode | Where-Object installed | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, Name, DisplayName, FeatureType  | Export-Csv -Path $OutputWinFeats -Append -NoTypeInformation
                         Get-HotFix -ComputerName $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, Description, HotFixID, InstalledBy, InstalledOn  | Export-csv -Path $OutputHotfixes -Append -NoTypeInformation
 
                         # HOST Network
-                        Get-Netadapter -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputNetFDrivers -Append -NoTypeInformation                    
+                        Get-Netadapter -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputNetAdapters -Append -NoTypeInformation                    
                         Get-NetAdapter -CimSession $ClusterNode | Where-Object {$_.ifOperStatus -eq "Up"} | Get-NetAdapterAdvancedProperty  | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputNetAdvProp -Append -NoTypeInformation
+                        Get-NetAdapterRSS -CimSession $ClusterNode | Where-Object {$_.ifOperStatus -eq "Up"} | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputNetAdpRSS -Append -NoTypeInformation
+                        Get-NetAdapterRDMA -CimSession $ClusterNode | Where-Object {$_.ifOperStatus -eq "Up"} | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputNetAdpRDMA -Append -NoTypeInformation
                         Get-NetAdapterHardwareInfo -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}}, @{N="ComputerName";E={$ClusterNode}}, *| Export-Csv -Path $OutputNetHW -Append -NoTypeInformation           
                         Get-NetLbfoTeam -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputLBFO -Append -NoTypeInformation
                         Get-VMSwitchTeam -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputSET -Append -NoTypeInformation            
@@ -421,8 +425,12 @@ $OutputMPIOSettings = "$TargetFolder\MPIOSettings.csv"; If (Test-Path $OutputLBF
                         # HOST Storage
                         $physicaldisk = Invoke-Command -ComputerName $ClusterNode -ScriptBlock  {Get-PhysicalDisk} | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}},*
                         $physicaldisk | Export-Csv -Path $Outputphysicaldisk -Append -NoTypeInformation 
+                        
+                        if ($CollectDiskHistory)
+                        {
                         $diskhistory = Invoke-Command -ComputerName $ClusterNode -ScriptBlock  {Get-PhysicalDisk  | Get-StorageHistory -NumberOfHours 168} | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}},FriendlyName,SerialNumber,FirmwareRevision,DeviceNumber,MediaType,StartTime,EndTime,TotalIoCount,SuccessIoCount,FailedIoCount,AvgIoLatency,TotalErrors,BucketIoPercent 
-                        $diskhistory | Export-Csv -Path $OutputDiskHistory -Append -NoTypeInformation 
+                        $diskhistory | Export-Csv -Path $OutputDiskHistory -Append -NoTypeInformation
+                        } 
 
                         $MPIOStatistics = Invoke-Command -ComputerName $ClusterNode -ScriptBlock {Get-WMIObject -NameSpace "root/wmi" -Class "MPIO_DISK_HEALTH_INFO" | Select-Object -Expand DiskHealthPackets} | Select-Object @{N="Cluster";E={$Cluster}},@{L="ComputerName";E={$ClusterNode}}, Name, NumberReads, NumberWrites, PathFailures, NumberIoErrors, NumberRetries | Sort-Object ComputerName, Name
                         $HBAStatistics = Invoke-Command -ComputerName $ClusterNode -ScriptBlock {Get-WMIObject -NameSpace "root/wmi" -Class "MSFC_FibrePortHBAStatistics" | Select-Object -Expand Statistics} | Select-Object @{N="Cluster";E={$Cluster}},@{L="ComputerName";E={$ClusterNode}}, DumpedFrames, ErrorFrames, InvalidCRCCount, InvalidTxWordCount, LinkFailureCount, LIPCount, LossOfSignalCount, LossOfSyncCount, NOSCount, SecondsSinceLastReset | Sort-Object ComputerName, InvalidTxWordCount
