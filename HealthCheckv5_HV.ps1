@@ -211,27 +211,25 @@ $OutputCluster08 = "$TargetFolder\Cluster-resowners.csv"; If (Test-Path $OutputC
 $OutputCluster09 = "$TargetFolder\Cluster-net.csv"; If (Test-Path $OutputCluster09) {Remove-Item $OutputCluster -Force}
 $OutputCluster10 = "$TargetFolder\Cluster-netint.csv"; If (Test-Path $OutputCluster10) {Remove-Item $OutputCluster -Force}
 $OutputCluster11 = "$TargetFolder\Cluster-access.csv"; If (Test-Path $OutputCluster11) {Remove-Item $OutputCluster -Force}
-$OutputEvents = "$TargetFolder\EventInfo.csv"; If (Test-Path $OutputEvents) {Remove-Item $OutputEvents -force}
-$OutputComputerinfo = "$TargetFolder\Computerinfo.csv"; If (Test-Path $OutputComputerinfo) {Remove-Item $OutputComputerinfo -force}
-$OutputHotfixes = "$TargetFolder\Hotfixes.csv"; If (Test-Path $OutputHotfixes) {Remove-Item $OutputHotfixes -Force}
-$OutputFiles = "$TargetFolder\Files.csv.csv"; If (Test-Path $OutputFiles) {Remove-Item $OutputFiles -Force}
-$OutputWinFeats = "$TargetFolder\WindowsFeats.csv"; If (Test-Path $OutputWinFeats) {Remove-Item $OutputWinFeats -force}
-$OutputNetAdapters = "$TargetFolder\NetDrivers.csv"; If (Test-Path $OutputNetAdapters) {Remove-Item $OutputNetAdapters -force}
-$OutputNetAdpRSS = "$TargetFolder\NetDrivers.csv"; If (Test-Path $OutputNetAdpRSS) {Remove-Item $OutputNetAdpRSS -force}
-$OutputNetAdpRDMA = "$TargetFolder\NetDrivers.csv"; If (Test-Path $OutputNetAdpRDMA) {Remove-Item $OutputNetAdpRDMA -force}
-OutputNetAdpRSS
-OutputNetAdpRDMA
+$OutputEvents = "$TargetFolder\HostEventInfo.csv"; If (Test-Path $OutputEvents) {Remove-Item $OutputEvents -force}
+$OutputComputerinfo = "$TargetFolder\HostComputerinfo.csv"; If (Test-Path $OutputComputerinfo) {Remove-Item $OutputComputerinfo -force}
+$OutputHotfixes = "$TargetFolder\HostHotfixes.csv"; If (Test-Path $OutputHotfixes) {Remove-Item $OutputHotfixes -Force}
+$OutputFiles = "$TargetFolder\HostFiles.csv.csv"; If (Test-Path $OutputFiles) {Remove-Item $OutputFiles -Force}
+$OutputWinFeats = "$TargetFolder\HostWindowsFeats.csv"; If (Test-Path $OutputWinFeats) {Remove-Item $OutputWinFeats -force}
+$OutputNetAdapters = "$TargetFolder\NetAdapters.csv"; If (Test-Path $OutputNetAdapters) {Remove-Item $OutputNetAdapters -force}
+$OutputNetAdpRSS = "$TargetFolder\NetAdpRSS.csv"; If (Test-Path $OutputNetAdpRSS) {Remove-Item $OutputNetAdpRSS -force}
+$OutputNetAdpRDMA = "$TargetFolder\NetAdpRDMA.csv"; If (Test-Path $OutputNetAdpRDMA) {Remove-Item $OutputNetAdpRDMA -force}
 $OutputNetHW = "$TargetFolder\NetHW.csv"; If (Test-Path $OutputNetHW) {Remove-Item $OutputNetHW -Force}
 $OutputNetAdvProp = "$TargetFolder\NetAdvProp.csv"; If (Test-Path $OutputNetAdvProp) {Remove-Item $OutputNetAdvProp -Force}
-$OutputLBFO = "$TargetFolder\LBFO.csv"; If (Test-Path $OutputLBFO) {Remove-Item $OutputLBFO -Force}
-$OutputSET = "$TargetFolder\SET.csv"; If (Test-Path $OutputSET) {Remove-Item $OutputSET -Force}
+$OutputLBFO = "$TargetFolder\TeamLBFO.csv"; If (Test-Path $OutputLBFO) {Remove-Item $OutputLBFO -Force}
+$OutputSET = "$TargetFolder\TeamSET.csv"; If (Test-Path $OutputSET) {Remove-Item $OutputSET -Force}
 $OutputvNIC = "$TargetFolder\NetvNIC.csv"; If (Test-Path $OutputvNIC) {Remove-Item $OutputvNIC -Force}
 $OutputVMSwith = "$TargetFolder\VMSwitch.csv"; If (Test-Path $OutputVMSwith) {Remove-Item $OutputVMSwith -Force}
-$OutputPhysicaldisk = "$TargetFolder\PhysicalDisk.csv"; If (Test-Path $OutputPhysicaldisk) {Remove-Item $OutputPhysicaldisk -Force}
-$OutputDiskHistory = "$TargetFolder\DiskHistory.csv"; If (Test-Path $OutputDiskHistory) {Remove-Item $OutputDiskHistory -Force}
-$OutputMPIO = "$TargetFolder\MPIOData.csv"; If (Test-Path $OutputMPIO) {Remove-Item $OutputMPIO -Force}
-$OutputHBA = "$TargetFolder\HBAData.csv"; If (Test-Path $OutputHBA) {Remove-Item $OutputHBA -Force}
-$OutputMPIOSettings = "$TargetFolder\MPIOSettings.csv"; If (Test-Path $OutputMPIOSettings) {Remove-Item $OutputMPIOSettings -Force}
+$OutputPhysicaldisk = "$TargetFolder\StoragePhyDisk.csv"; If (Test-Path $OutputPhysicaldisk) {Remove-Item $OutputPhysicaldisk -Force}
+$OutputDiskHistory = "$TargetFolder\StorageDiskHistory.csv"; If (Test-Path $OutputDiskHistory) {Remove-Item $OutputDiskHistory -Force}
+$OutputMPIO = "$TargetFolder\StorageMPIOData.csv"; If (Test-Path $OutputMPIO) {Remove-Item $OutputMPIO -Force}
+$OutputHBA = "$TargetFolder\StorageHBAData.csv"; If (Test-Path $OutputHBA) {Remove-Item $OutputHBA -Force}
+$OutputMPIOSettings = "$TargetFolder\StorageMPIOSettings.csv"; If (Test-Path $OutputMPIOSettings) {Remove-Item $OutputMPIOSettings -Force}
        
 #### END Output files init
 
