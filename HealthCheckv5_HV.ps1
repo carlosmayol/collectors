@@ -502,7 +502,6 @@ $OutputMPIOSettings = "$TargetFolder\StorageMPIOSettings.csv"; If (Test-Path $Ou
             Write-Host ""
             Write-Host ""
             Log-Error -LogPath $sLogFile -ErrorDesc "Connection to $Cluster does not work properly! going to next one ...." -ExitGracefully $false
-
         }
 
         #Progress Bar artifact 
