@@ -204,7 +204,6 @@ $OutputCluster01 = "$TargetFolder\Cluster-Core.csv"; If (Test-Path $OutputCluste
 $OutputCluster02 = "$TargetFolder\Cluster-nodes.csv"; If (Test-Path $OutputCluster02) {Remove-Item $OutputCluster -Force}
 $OutputCluster03 = "$TargetFolder\Cluster-group.csv" ; If (Test-Path $OutputCluster03) {Remove-Item $OutputCluster -Force}
 $OutputCluster04 = "$TargetFolder\Cluster-groupadv.csv" ; If (Test-Path $OutputCluster04) {Remove-Item $OutputCluster -Force}
-$OutputCluster05 = "$TargetFolder\Cluster-groupowners.csv"; If (Test-Path $OutputCluster05) {Remove-Item $OutputCluster -Force}
 $OutputCluster06 = "$TargetFolder\Cluster-res.csv"; If (Test-Path $OutputCluster06) {Remove-Item $OutputCluster -Force}
 $OutputCluster07 = "$TargetFolder\Cluster-resadv.csv"; If (Test-Path $OutputCluster07) {Remove-Item $OutputCluster -Force}
 $OutputCluster08 = "$TargetFolder\Cluster-resowners.csv"; If (Test-Path $OutputCluster08) {Remove-Item $OutputCluster -Force}
@@ -230,6 +229,9 @@ $OutputDiskHistory = "$TargetFolder\StorageDiskHistory.csv"; If (Test-Path $Outp
 $OutputMPIO = "$TargetFolder\StorageMPIOData.csv"; If (Test-Path $OutputMPIO) {Remove-Item $OutputMPIO -Force}
 $OutputHBA = "$TargetFolder\StorageHBAData.csv"; If (Test-Path $OutputHBA) {Remove-Item $OutputHBA -Force}
 $OutputMPIOSettings = "$TargetFolder\StorageMPIOSettings.csv"; If (Test-Path $OutputMPIOSettings) {Remove-Item $OutputMPIOSettings -Force}
+$OutputvDisk = "$TargetFolder\StoragevDisk.csv"; If (Test-Path $OutputvDisk) {Remove-Item $OutputvDisk -Force}
+$OutputCSV = "$TargetFolder\Cluster-CSV.csv"; If (Test-Path $OutputCSV) {Remove-Item $OutputCSV -Force}
+$OutputCSVState = "$TargetFolder\Cluster-CSVState.csv"; If (Test-Path $OutputCSVState) {Remove-Item $OutputCSVState -Force}
        
 #### END Output files init
 
@@ -278,26 +280,28 @@ $OutputMPIOSettings = "$TargetFolder\StorageMPIOSettings.csv"; If (Test-Path $Ou
             $clusternodes = Get-ClusterNode -Cluster $cluster | Select-Object -Property *
             $clustergroup = Get-ClusterGroup -Cluster $cluster | Select-Object -Property *
             $clustergroupadv = Get-ClusterGroup -Cluster $cluster | get-clusterparameter | Select-Object -Property *
-            $clustergroupownernode = Get-ClusterGroup -Cluster $cluster | Get-ClusterOwnerNode | Select-Object -Property ClusterObject -ExpandProperty OwnerNodes | Select-Object -Property *
             $clusterresources = Get-ClusterResource -Cluster $cluster | get-clusterparameter | Select-Object -Property *
             $clusterresourcesadv = Get-ClusterResource -Cluster $cluster | Select-Object -Property *
             $clusterresourceownernode = Get-ClusterResource -Cluster $cluster | Get-ClusterOwnerNode | Select-Object -Property ClusterObject -ExpandProperty OwnerNodes | Select-Object -Property *
             $clusternetwork = Get-ClusterNetwork -Cluster $cluster | Select-Object -Property *
             $clusternetworkinterface = Get-ClusterNetworkInterface -Cluster $cluster | Select-Object -Property *
             $clusteraccess = Get-ClusterAccess -Cluster $cluster | Select-Object -Property *
-            
+            $clusterCSV = Get-ClusterSharedVolume -Cluster $cluster | Select-Object -Property *
+            $clusterCSVState =Get-ClusterSharedVolumeState -Cluster $cluster | Select-Object -Property *
+
             #Exporting Cluster Objects & appending results if more than one cluster is collected.
             $clustercore | Export-Csv -Path $OutputCluster01 -NoTypeInformation -Append
             $clusternodes | Export-Csv -Path $OutputCluster02 -NoTypeInformation -Append
             $clustergroup | Export-Csv -Path $OutputCluster03 -NoTypeInformation -Append
             $clustergroupadv | Export-Csv -Path $OutputCluster04 -NoTypeInformation -Append
-            $clustergroupownernode | Export-Csv -Path $OutputCluster05 -NoTypeInformation -Append
             $clusterresources | Export-Csv -Path $OutputCluster06 -NoTypeInformation -Append
             $clusterresourcesadv | Export-Csv -Path $OutputCluster07 -NoTypeInformation -Append
             $clusterresourceownernode | Export-Csv -Path $OutputCluster08 -NoTypeInformation -Append
             $clusternetwork | Export-Csv -Path $OutputCluster09 -NoTypeInformation -Append
             $clusternetworkinterface | Export-Csv -Path $OutputCluster10 -NoTypeInformation -Append
             $clusteraccess | Export-Csv -Path $OutputCluster11 -NoTypeInformation -Append
+            $clusterCSV | Export-Csv -Path $OutputCSV -NoTypeInformation -Append
+            $clusterCSVState | Export-Csv -Path $OutputCSVState -NoTypeInformation -Append
             #####End Cluster Objects collection & Export process 
 
             if ($CollectClusterLogs) {
@@ -431,13 +435,14 @@ $OutputMPIOSettings = "$TargetFolder\StorageMPIOSettings.csv"; If (Test-Path $Ou
                         } 
 
                         $MPIOStatistics = Invoke-Command -ComputerName $ClusterNode -ScriptBlock {Get-WMIObject -NameSpace "root/wmi" -Class "MPIO_DISK_HEALTH_INFO" | Select-Object -Expand DiskHealthPackets} | Select-Object @{N="Cluster";E={$Cluster}},@{L="ComputerName";E={$ClusterNode}}, Name, NumberReads, NumberWrites, PathFailures, NumberIoErrors, NumberRetries | Sort-Object ComputerName, Name
-                        $HBAStatistics = Invoke-Command -ComputerName $ClusterNode -ScriptBlock {Get-WMIObject -NameSpace "root/wmi" -Class "MSFC_FibrePortHBAStatistics" | Select-Object -Expand Statistics} | Select-Object @{N="Cluster";E={$Cluster}},@{L="ComputerName";E={$ClusterNode}}, DumpedFrames, ErrorFrames, InvalidCRCCount, InvalidTxWordCount, LinkFailureCount, LIPCount, LossOfSignalCount, LossOfSyncCount, NOSCount, SecondsSinceLastReset | Sort-Object ComputerName, InvalidTxWordCount
                         $MPIOStatistics | Export-Csv -Path $OutputMPIO -Append -NoTypeInformation
+                        $HBAStatistics = Invoke-Command -ComputerName $ClusterNode -ScriptBlock {Get-WMIObject -NameSpace "root/wmi" -Class "MSFC_FibrePortHBAStatistics" | Select-Object -Expand Statistics} | Select-Object @{N="Cluster";E={$Cluster}},@{L="ComputerName";E={$ClusterNode}}, DumpedFrames, ErrorFrames, InvalidCRCCount, InvalidTxWordCount, LinkFailureCount, LIPCount, LossOfSignalCount, LossOfSyncCount, NOSCount, SecondsSinceLastReset | Sort-Object ComputerName, InvalidTxWordCount
                         $HBAStatistics | Export-Csv -Path $OutputHBA -Append -NoTypeInformation        
                         $MPIOSettings = Invoke-Command -ComputerName $ClusterNode -ScriptBlock {Get-MPIOSetting}| Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}},PathVerificationState, PathVericationPeriod, PDORemovePeriod, RetryCount, RetryInterval, UseCustomPathRecoveryTime, CustomPathRecoveryTime, DiskTimeoutValue
                         $MPIOSettings | Export-Csv -Path $OutputMPIOSettings -Append -NoTypeInformation
+                        $virtualDisk = Invoke-Command -ComputerName $ClusterNode -ScriptBlock {Get-VirtualDisk} | Select-Object @{N="Cluster";E={$Cluster}},@{L="ComputerName";E={$ClusterNode}}, Name, NumberReads, NumberWrites, PathFailures, NumberIoErrors, NumberRetries | Sort-Object ComputerName, Name
+                        $virtualDisk | Export-Csv -Path $OutputvDisk -Append -NoTypeInformation 
 
-                        
                         #HOST remote PSSession for FileVersion                
                         $session = New-PSSession -ComputerName $ClusterNode
                         Invoke-Command -Session $session -ArgumentList @($files) -ScriptBlock {
