@@ -210,6 +210,8 @@ $OutputCluster08 = "$TargetFolder\Cluster-resowners.csv"; If (Test-Path $OutputC
 $OutputCluster09 = "$TargetFolder\Cluster-net.csv"; If (Test-Path $OutputCluster09) {Remove-Item $OutputCluster -Force}
 $OutputCluster10 = "$TargetFolder\Cluster-netint.csv"; If (Test-Path $OutputCluster10) {Remove-Item $OutputCluster -Force}
 $OutputCluster11 = "$TargetFolder\Cluster-access.csv"; If (Test-Path $OutputCluster11) {Remove-Item $OutputCluster -Force}
+$OutputCSV = "$TargetFolder\Cluster-CSV.csv"; If (Test-Path $OutputCSV) {Remove-Item $OutputCSV -Force}
+$OutputCSVState = "$TargetFolder\Cluster-CSVState.csv"; If (Test-Path $OutputCSVState) {Remove-Item $OutputCSVState -Force}
 $OutputEvents = "$TargetFolder\HostEventInfo.csv"; If (Test-Path $OutputEvents) {Remove-Item $OutputEvents -force}
 $OutputComputerinfo = "$TargetFolder\HostComputerinfo.csv"; If (Test-Path $OutputComputerinfo) {Remove-Item $OutputComputerinfo -force}
 $OutputHotfixes = "$TargetFolder\HostHotfixes.csv"; If (Test-Path $OutputHotfixes) {Remove-Item $OutputHotfixes -Force}
@@ -230,8 +232,7 @@ $OutputMPIO = "$TargetFolder\StorageMPIOData.csv"; If (Test-Path $OutputMPIO) {R
 $OutputHBA = "$TargetFolder\StorageHBAData.csv"; If (Test-Path $OutputHBA) {Remove-Item $OutputHBA -Force}
 $OutputMPIOSettings = "$TargetFolder\StorageMPIOSettings.csv"; If (Test-Path $OutputMPIOSettings) {Remove-Item $OutputMPIOSettings -Force}
 $OutputvDisk = "$TargetFolder\StoragevDisk.csv"; If (Test-Path $OutputvDisk) {Remove-Item $OutputvDisk -Force}
-$OutputCSV = "$TargetFolder\Cluster-CSV.csv"; If (Test-Path $OutputCSV) {Remove-Item $OutputCSV -Force}
-$OutputCSVState = "$TargetFolder\Cluster-CSVState.csv"; If (Test-Path $OutputCSVState) {Remove-Item $OutputCSVState -Force}
+$OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) {Remove-Item $OutputVolume -Force}
        
 #### END Output files init
 
@@ -434,14 +435,16 @@ $OutputCSVState = "$TargetFolder\Cluster-CSVState.csv"; If (Test-Path $OutputCSV
                         $diskhistory | Export-Csv -Path $OutputDiskHistory -Append -NoTypeInformation
                         } 
 
-                        $MPIOStatistics = Invoke-Command -ComputerName $ClusterNode -ScriptBlock {Get-WMIObject -NameSpace "root/wmi" -Class "MPIO_DISK_HEALTH_INFO" | Select-Object -Expand DiskHealthPackets} | Select-Object @{N="Cluster";E={$Cluster}},@{L="ComputerName";E={$ClusterNode}}, Name, NumberReads, NumberWrites, PathFailures, NumberIoErrors, NumberRetries | Sort-Object ComputerName, Name
+                        $MPIOStatistics = Invoke-Command -ComputerName $ClusterNode -ScriptBlock {Get-WMIObject -NameSpace "root/wmi" -Class "MPIO_DISK_HEALTH_INFO" | Select-Object -Expand DiskHealthPackets} | Select-Object @{N="Cluster";E={$Cluster}},@{L="ComputerName";E={$ClusterNode}}, Name, NumberReads, NumberWrites, PathFailures, NumberIoErrors, NumberRetries 
                         $MPIOStatistics | Export-Csv -Path $OutputMPIO -Append -NoTypeInformation
-                        $HBAStatistics = Invoke-Command -ComputerName $ClusterNode -ScriptBlock {Get-WMIObject -NameSpace "root/wmi" -Class "MSFC_FibrePortHBAStatistics" | Select-Object -Expand Statistics} | Select-Object @{N="Cluster";E={$Cluster}},@{L="ComputerName";E={$ClusterNode}}, DumpedFrames, ErrorFrames, InvalidCRCCount, InvalidTxWordCount, LinkFailureCount, LIPCount, LossOfSignalCount, LossOfSyncCount, NOSCount, SecondsSinceLastReset | Sort-Object ComputerName, InvalidTxWordCount
+                        $HBAStatistics = Invoke-Command -ComputerName $ClusterNode -ScriptBlock {Get-WMIObject -NameSpace "root/wmi" -Class "MSFC_FibrePortHBAStatistics" | Select-Object -Expand Statistics} | Select-Object @{N="Cluster";E={$Cluster}},@{L="ComputerName";E={$ClusterNode}}, DumpedFrames, ErrorFrames, InvalidCRCCount, InvalidTxWordCount, LinkFailureCount, LIPCount, LossOfSignalCount, LossOfSyncCount, NOSCount, SecondsSinceLastReset
                         $HBAStatistics | Export-Csv -Path $OutputHBA -Append -NoTypeInformation        
                         $MPIOSettings = Invoke-Command -ComputerName $ClusterNode -ScriptBlock {Get-MPIOSetting}| Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}},PathVerificationState, PathVericationPeriod, PDORemovePeriod, RetryCount, RetryInterval, UseCustomPathRecoveryTime, CustomPathRecoveryTime, DiskTimeoutValue
                         $MPIOSettings | Export-Csv -Path $OutputMPIOSettings -Append -NoTypeInformation
-                        $virtualDisk = Invoke-Command -ComputerName $ClusterNode -ScriptBlock {Get-VirtualDisk} | Select-Object @{N="Cluster";E={$Cluster}},@{L="ComputerName";E={$ClusterNode}}, Name, NumberReads, NumberWrites, PathFailures, NumberIoErrors, NumberRetries | Sort-Object ComputerName, Name
+                        $virtualDisk = Invoke-Command -ComputerName $ClusterNode -ScriptBlock {Get-VirtualDisk} | Select-Object @{N="Cluster";E={$Cluster}},@{L="ComputerName";E={$ClusterNode}}, *
                         $virtualDisk | Export-Csv -Path $OutputvDisk -Append -NoTypeInformation 
+                        $Volumes = Invoke-Command -ComputerName $ClusterNode -ScriptBlock {Get-Volume} | Select-Object @{N="Cluster";E={$Cluster}},@{L="ComputerName";E={$ClusterNode}}, *
+                        $Volumes| Export-Csv -Path $OutputvDisk -Append -NoTypeInformation 
 
                         #HOST remote PSSession for FileVersion                
                         $session = New-PSSession -ComputerName $ClusterNode
