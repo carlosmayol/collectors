@@ -204,6 +204,7 @@ $OutputCluster01 = "$TargetFolder\Cluster-Core.csv"; If (Test-Path $OutputCluste
 $OutputCluster02 = "$TargetFolder\Cluster-nodes.csv"; If (Test-Path $OutputCluster02) {Remove-Item $OutputCluster -Force}
 $OutputCluster03 = "$TargetFolder\Cluster-group.csv" ; If (Test-Path $OutputCluster03) {Remove-Item $OutputCluster -Force}
 $OutputCluster04 = "$TargetFolder\Cluster-groupadv.csv" ; If (Test-Path $OutputCluster04) {Remove-Item $OutputCluster -Force}
+$OutputCluster05 = "$TargetFolder\Cluster-groupowners.csv"; If (Test-Path $OutputCluster05) {Remove-Item $OutputCluster -Force}
 $OutputCluster06 = "$TargetFolder\Cluster-res.csv"; If (Test-Path $OutputCluster06) {Remove-Item $OutputCluster -Force}
 $OutputCluster07 = "$TargetFolder\Cluster-resadv.csv"; If (Test-Path $OutputCluster07) {Remove-Item $OutputCluster -Force}
 $OutputCluster08 = "$TargetFolder\Cluster-resowners.csv"; If (Test-Path $OutputCluster08) {Remove-Item $OutputCluster -Force}
@@ -281,6 +282,7 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
             $clusternodes = Get-ClusterNode -Cluster $cluster | Select-Object -Property *
             $clustergroup = Get-ClusterGroup -Cluster $cluster | Select-Object -Property *
             $clustergroupadv = Get-ClusterGroup -Cluster $cluster | get-clusterparameter | Select-Object -Property *
+            $clustergroupownernode = Get-ClusterGroup -Cluster $cluster | Get-ClusterOwnerNode | Select-Object -Property ClusterObject -ExpandProperty OwnerNodes | Select-Object -Property *
             $clusterresources = Get-ClusterResource -Cluster $cluster | get-clusterparameter | Select-Object -Property *
             $clusterresourcesadv = Get-ClusterResource -Cluster $cluster | Select-Object -Property *
             $clusterresourceownernode = Get-ClusterResource -Cluster $cluster | Get-ClusterOwnerNode | Select-Object -Property ClusterObject -ExpandProperty OwnerNodes | Select-Object -Property *
@@ -295,6 +297,7 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
             $clusternodes | Export-Csv -Path $OutputCluster02 -NoTypeInformation -Append
             $clustergroup | Export-Csv -Path $OutputCluster03 -NoTypeInformation -Append
             $clustergroupadv | Export-Csv -Path $OutputCluster04 -NoTypeInformation -Append
+            $clustergroupownernode | Export-Csv -Path $OutputCluster05 -NoTypeInformation -Append
             $clusterresources | Export-Csv -Path $OutputCluster06 -NoTypeInformation -Append
             $clusterresourcesadv | Export-Csv -Path $OutputCluster07 -NoTypeInformation -Append
             $clusterresourceownernode | Export-Csv -Path $OutputCluster08 -NoTypeInformation -Append
