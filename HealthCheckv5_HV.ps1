@@ -444,7 +444,7 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
                         $virtualDisk = Invoke-Command -ComputerName $ClusterNode -ScriptBlock {Get-VirtualDisk} | Select-Object @{N="Cluster";E={$Cluster}},@{L="ComputerName";E={$ClusterNode}}, *
                         $virtualDisk | Export-Csv -Path $OutputvDisk -Append -NoTypeInformation 
                         $Volumes = Invoke-Command -ComputerName $ClusterNode -ScriptBlock {Get-Volume} | Select-Object @{N="Cluster";E={$Cluster}},@{L="ComputerName";E={$ClusterNode}}, *
-                        $Volumes| Export-Csv -Path $OutputvDisk -Append -NoTypeInformation 
+                        $Volumes| Export-Csv -Path $OutputVolume -Append -NoTypeInformation 
 
                         #HOST remote PSSession for FileVersion                
                         $session = New-PSSession -ComputerName $ClusterNode
