@@ -424,10 +424,10 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
                         Get-NetAdapterRDMA -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputNetAdpRDMA -Append -NoTypeInformation
                         Get-NetAdapterHardwareInfo -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}}, @{N="ComputerName";E={$ClusterNode}}, *| Export-Csv -Path $OutputNetHW -Append -NoTypeInformation           
                         Get-NetLbfoTeam -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputLBFO -Append -NoTypeInformation
-                        Get-VMSwitchTeam -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputSET -Append -NoTypeInformation            
-                        Get-VMNetworkAdapter -ManagementOS -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, Name, vr*,vmq*, vmmq* | Export-Csv -Path $OutputvNIC -Append -NoTypeInformation
                         Get-VMSwitch -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputVMSwith -Append -NoTypeInformation
-
+                        Get-VMSwitch | Get-VMSwitchTeam -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputSET -Append -NoTypeInformation            
+                        Get-VMNetworkAdapter -ManagementOS -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, Name, vr*,vmq*, vmmq* | Export-Csv -Path $OutputvNIC -Append -NoTypeInformation
+                    
                         # HOST Storage
                         $physicaldisk = Invoke-Command -ComputerName $ClusterNode -ScriptBlock  {Get-PhysicalDisk} | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}},*
                         $physicaldisk | Export-Csv -Path $Outputphysicaldisk -Append -NoTypeInformation 
