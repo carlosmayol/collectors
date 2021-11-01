@@ -216,18 +216,27 @@ $OutputCSVState = "$TargetFolder\Cluster-CSVState.csv"; If (Test-Path $OutputCSV
 $OutputEvents = "$TargetFolder\HostEventInfo.csv"; If (Test-Path $OutputEvents) {Remove-Item $OutputEvents -force}
 $OutputComputerinfo = "$TargetFolder\HostComputerinfo.csv"; If (Test-Path $OutputComputerinfo) {Remove-Item $OutputComputerinfo -force}
 $OutputHotfixes = "$TargetFolder\HostHotfixes.csv"; If (Test-Path $OutputHotfixes) {Remove-Item $OutputHotfixes -Force}
-$OutputVMHost = "$TargetFolder\VMHost.csv"; If (Test-Path $OutputVMHost) {Remove-Item $OutputVMHost -Force}
 $OutputFiles = "$TargetFolder\HostFiles.csv.csv"; If (Test-Path $OutputFiles) {Remove-Item $OutputFiles -Force}
 $OutputWinFeats = "$TargetFolder\HostWindowsFeats.csv"; If (Test-Path $OutputWinFeats) {Remove-Item $OutputWinFeats -force}
+$OutputVMHost = "$TargetFolder\VMHost.csv"; If (Test-Path $OutputVMHost) {Remove-Item $OutputVMHost -Force}
+$OutputVMHostDDA = "$TargetFolder\VMHostDDA.csv"; If (Test-Path $OutputVMHostDDA) {Remove-Item $OutputVMHostDDA -Force}
+$OutputVMHostNuma   = "$TargetFolder\VMHostNuma.csv"; If (Test-Path $OutputVMHostNuma) {Remove-Item $OutputVMHostNuma -Force}
+$OutputVMHostNumaStatus  = "$TargetFolder\VMHostNumaStatus.csv"; If (Test-Path $OutputVMHostNumaStatus) {Remove-Item $OutputVMHostNumaStatus -Force}
+$OutputVMHostGPU  = "$TargetFolder\VMHostGPU.csv"; If (Test-Path $OutputVMHostGPU) {Remove-Item $OutputVMHostGPU -Force}
+$OutputVMHostVersions = "$TargetFolder\VMHostVersions.csv"; If (Test-Path $OutputVMHostVersions) {Remove-Item $OutputVMHostVersions -Force}
 $OutputNetAdapters = "$TargetFolder\NetAdapters.csv"; If (Test-Path $OutputNetAdapters) {Remove-Item $OutputNetAdapters -force}
 $OutputNetAdpRSS = "$TargetFolder\NetAdpRSS.csv"; If (Test-Path $OutputNetAdpRSS) {Remove-Item $OutputNetAdpRSS -force}
 $OutputNetAdpRDMA = "$TargetFolder\NetAdpRDMA.csv"; If (Test-Path $OutputNetAdpRDMA) {Remove-Item $OutputNetAdpRDMA -force}
 $OutputNetHW = "$TargetFolder\NetHW.csv"; If (Test-Path $OutputNetHW) {Remove-Item $OutputNetHW -Force}
 $OutputNetAdvProp = "$TargetFolder\NetAdvProp.csv"; If (Test-Path $OutputNetAdvProp) {Remove-Item $OutputNetAdvProp -Force}
 $OutputLBFO = "$TargetFolder\TeamLBFO.csv"; If (Test-Path $OutputLBFO) {Remove-Item $OutputLBFO -Force}
-$OutputSET = "$TargetFolder\TeamSET.csv"; If (Test-Path $OutputSET) {Remove-Item $OutputSET -Force}
+$OutputVMSWitch = "$TargetFolder\VMSwitch.csv"; If (Test-Path $OutputVMSWitch) {Remove-Item $OutputVMSWitch -Force}
+$OutputVMSwithTeam = "$TargetFolder\VMSwitchTeam.csv"; If (Test-Path $OutputVMSwithTeam) {Remove-Item $OutputVMSwithTeam -Force}
+$OutputSwitchExt = "$TargetFolder\VMSwitchExt.csv"; If (Test-Path $OutputSwitchExt) {Remove-Item $OutputSwitchExt -Force}
 $OutputvNIC = "$TargetFolder\NetvNIC.csv"; If (Test-Path $OutputvNIC) {Remove-Item $OutputvNIC -Force}
-$OutputVMSwith = "$TargetFolder\VMSwitch.csv"; If (Test-Path $OutputVMSwith) {Remove-Item $OutputVMSwith -Force}
+$OutputvNICACL = "$TargetFolder\NetvNICACL.csv"; If (Test-Path $OutputvNICACL) {Remove-Item $OutputvNICACL -Force}
+$OutputvNICIso = "$TargetFolder\NetvNICISO.csv"; If (Test-Path $OutputvNICIso) {Remove-Item $OutputvNICIso -Force}
+$OutputvNICVlan = "$TargetFolder\NetvNICVLAN.csv"; If (Test-Path $OutputvNICVlan) {Remove-Item $OutputvNICVlan -Force}
 $OutputPhysicaldisk = "$TargetFolder\StoragePhyDisk.csv"; If (Test-Path $OutputPhysicaldisk) {Remove-Item $OutputPhysicaldisk -Force}
 $OutputDiskHistory = "$TargetFolder\StorageDiskHistory.csv"; If (Test-Path $OutputDiskHistory) {Remove-Item $OutputDiskHistory -Force}
 $OutputMPIO = "$TargetFolder\StorageMPIOData.csv"; If (Test-Path $OutputMPIO) {Remove-Item $OutputMPIO -Force}
@@ -420,29 +429,29 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
                         
                         # Hyper-V Host
                         Get-VMHost -ComputerName  $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-csv -Path $OutputVMHost -Append -NoTypeInformation
-                        Get-VMHostAssignableDevice
-                        Get-VMHostNumaNode
-                        Get-VMHostNumaNodeStatus
-                        Get-VMHostPartitionableGpu
-                        Get-VMHostSupportedVersion
+                        Get-VMHostAssignableDevice -ComputerName  $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-csv -Path $OutputVMHostDDA -Append -NoTypeInformation
+                        Get-VMHostNumaNode -ComputerName  $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-csv -Path $OutputVMHostNuma -Append -NoTypeInformation
+                        Get-VMHostNumaNodeStatus -ComputerName  $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-csv -Path $OutputVMHostNumaStatus -Append -NoTypeInformation
+                        Get-VMHostPartitionableGpu -ComputerName  $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-csv -Path $OutputVMHostGPU -Append -NoTypeInformation
+                        Get-VMHostSupportedVersion -ComputerName  $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-csv -Path $OutputVMHostVersions -Append -NoTypeInformation
 
                         #HOST Mitigations/Hyper-Care
 
                         # HOST Network
                         Get-Netadapter -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputNetAdapters -Append -NoTypeInformation                    
                         Get-NetAdapter -CimSession $ClusterNode | Where-Object {$_.ifOperStatus -eq "Up"} | Get-NetAdapterAdvancedProperty  | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputNetAdvProp -Append -NoTypeInformation
-                        Get-VMNetworkAdapterAcl
-                        Get-VMNetworkAdapterIsolation
-                        Get-VMNetworkAdapterVlan
                         Get-NetAdapterRSS -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputNetAdpRSS -Append -NoTypeInformation
                         Get-NetAdapterRDMA -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputNetAdpRDMA -Append -NoTypeInformation
                         Get-NetAdapterHardwareInfo -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}}, @{N="ComputerName";E={$ClusterNode}}, *| Export-Csv -Path $OutputNetHW -Append -NoTypeInformation           
                         Get-NetLbfoTeam -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputLBFO -Append -NoTypeInformation
                         Get-VMSwitch -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputVMSwith -Append -NoTypeInformation
-                        Get-VMSwitch -CimSession $ClusterNode | Get-VMSwitchTeam -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputSET -Append -NoTypeInformation            
-                        Get-VMSwitchExtension
-                        Get-VMNetworkAdapter -ManagementOS -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, Name, vr*,vmq*, vmmq* | Export-Csv -Path $OutputvNIC -Append -NoTypeInformation
-                    
+                        Get-VMSwitch -CimSession $ClusterNode | Get-VMSwitchTeam -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputVMSwithTeam -Append -NoTypeInformation            
+                        Get-VMSwitchExtension -CimSession $ClusterNode | Get-VMSwitchTeam -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputSwitchExt -Append -NoTypeInformation            
+                        Get-VMNetworkAdapter -ManagementOS -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputvNIC -Append -NoTypeInformation
+                        Get-VMNetworkAdapterAcl -ManagementOS  -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputvNICACL -Append -NoTypeInformation
+                        Get-VMNetworkAdapterIsolation -ManagementOS  -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, ** | Export-Csv -Path $OutputvNICIso -Append -NoTypeInformation
+                        Get-VMNetworkAdapterVlan -ManagementOS  -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputvNICVlan -Append -NoTypeInformation
+
                         # HOST Storage (requires invoked sessions)
                         $physicaldisk = Invoke-Command -ComputerName $ClusterNode -ScriptBlock  {Get-PhysicalDisk} | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}},*
                         $physicaldisk | Export-Csv -Path $Outputphysicaldisk -Append -NoTypeInformation 
