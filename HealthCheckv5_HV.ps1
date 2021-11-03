@@ -427,6 +427,44 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
                         Get-WindowsFeature -ComputerName $ClusterNode | Where-Object installed | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, Name, DisplayName, FeatureType  | Export-Csv -Path $OutputWinFeats -Append -NoTypeInformation
                         Get-HotFix -ComputerName $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, Description, HotFixID, InstalledBy, InstalledOn  | Export-csv -Path $OutputHotfixes -Append -NoTypeInformation
                         
+                        #HOST Files FileVersion (requires RemotePS Session)
+                        $session = New-PSSession -ComputerName $ClusterNode
+                        Invoke-Command -Session $session -ArgumentList @($files) -ScriptBlock {
+                                            
+                            #New Crypto Obj for Hash gattering
+                            $sha2 = New-Object -TypeName System.Security.Cryptography.SHA256CryptoServiceProvider
+
+                            #Creating Hash array
+                            $fileinfo = $null
+                            $fileinfo = @();
+                            
+                            Add-Member -InputObject $fileinfo -MemberType NoteProperty -Name Server -Value ""
+                            Add-Member -InputObject $fileinfo -MemberType NoteProperty -Name Name -Value ""
+                            Add-Member -InputObject $fileinfo -MemberType NoteProperty -Name FileVersion -Value ""
+                            Add-Member -InputObject $fileinfo -MemberType NoteProperty -Name SHA2Hash -value ""
+
+                            #$args contains the passed argument as an array to the remote host in the invoke command line
+                            foreach ($file in $args) {
+
+                            #Commenting because get-filehash is only available in PS4 and beyond
+                            #$fileinfo += get-item $file -ErrorAction Ignore  | Select @{N="Server";E={$env:COMPUTERNAME}},Name, FileVersionUpdated, @{N="SHA2Hash";E={Get-FileHash -Path $file | %{$_.hash}}}
+                            
+                            $sha2Hash = [System.BitConverter]::ToString( $sha2.ComputeHash( [System.IO.File]::ReadAllBytes($file) ) ) 
+                            $sha2Hash = $sha2Hash.Replace("-", "")
+
+                            #ErrorAction is set to silentContinue in case a file defined in the txt does not exist in the system
+                            $fileinfo += get-item $file  -ErrorAction SilentlyContinue | Select-Object @{N="Server";E={$env:COMPUTERNAME}},Name,@{N="FileVersion";E={"$($_.VersionInfo.FileMajorPart).$($_.VersionInfo.FileMinorPart).$($_.VersionInfo.FileBuildPart).$($_.VersionInfo.FilePrivatePart)"}},@{N="SHA2Hash";E={$sha2Hash}}
+
+                            } #End foreach file collection
+                        
+                        } #End Remote ScriptBlock
+
+                        ##HOST remote PSSession for FileVersion -> Collection the results into the local system
+                        $filesresult = Invoke-Command -session $session -ScriptBlock {$fileinfo}
+                        $filesresult | Where-Object {$_} | Export-Csv -Path $OutputFiles -Append -NoTypeInformation
+                        Remove-PSSession -Session $session
+
+
                         # Hyper-V Host
                         Get-VMHost -ComputerName  $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-csv -Path $OutputVMHost -Append -NoTypeInformation
                         Get-VMHostAssignableDevice -ComputerName  $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-csv -Path $OutputVMHostDDA -Append -NoTypeInformation
@@ -473,42 +511,7 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
                         $Volumes = Invoke-Command -ComputerName $ClusterNode -ScriptBlock {Get-Volume} | Select-Object @{N="Cluster";E={$Cluster}},@{L="ComputerName";E={$ClusterNode}}, *
                         $Volumes| Export-Csv -Path $OutputVolume -Append -NoTypeInformation 
 
-                        #HOST remote PSSession for FileVersion                
-                        $session = New-PSSession -ComputerName $ClusterNode
-                        Invoke-Command -Session $session -ArgumentList @($files) -ScriptBlock {
-                                            
-                            #New Crypto Obj for Hash gattering
-                            $sha2 = New-Object -TypeName System.Security.Cryptography.SHA256CryptoServiceProvider
 
-                            #Creating Hash array
-                            $fileinfo = $null
-                            $fileinfo = @();
-                            
-                            Add-Member -InputObject $fileinfo -MemberType NoteProperty -Name Server -Value ""
-                            Add-Member -InputObject $fileinfo -MemberType NoteProperty -Name Name -Value ""
-                            Add-Member -InputObject $fileinfo -MemberType NoteProperty -Name FileVersion -Value ""
-                            Add-Member -InputObject $fileinfo -MemberType NoteProperty -Name SHA2Hash -value ""
-
-                            #$args contains the passed argument as an array to the remote host in the invoke command line
-                            foreach ($file in $args) {
-
-                            #Commenting because get-filehash is only available in PS4 and beyond
-                            #$fileinfo += get-item $file -ErrorAction Ignore  | Select @{N="Server";E={$env:COMPUTERNAME}},Name, FileVersionUpdated, @{N="SHA2Hash";E={Get-FileHash -Path $file | %{$_.hash}}}
-                            
-                            $sha2Hash = [System.BitConverter]::ToString( $sha2.ComputeHash( [System.IO.File]::ReadAllBytes($file) ) ) 
-                            $sha2Hash = $sha2Hash.Replace("-", "")
-
-                            #ErrorAction is set to silentContinue in case a file defined in the txt does not exist in the system
-                            $fileinfo += get-item $file  -ErrorAction SilentlyContinue | Select-Object @{N="Server";E={$env:COMPUTERNAME}},Name,@{N="FileVersion";E={"$($_.VersionInfo.FileMajorPart).$($_.VersionInfo.FileMinorPart).$($_.VersionInfo.FileBuildPart).$($_.VersionInfo.FilePrivatePart)"}},@{N="SHA2Hash";E={$sha2Hash}}
-
-                            } #End foreach file collection
-                        
-                        } #End Remote ScriptBlock
-
-                        ##HOST remote PSSession for FileVersion -> Collection the results into the local system
-                        $filesresult = Invoke-Command -session $session -ScriptBlock {$fileinfo}
-                        $filesresult | Where-Object {$_} | Export-Csv -Path $OutputFiles -Append -NoTypeInformation
-                        Remove-PSSession -Session $session
 
                     } #end collectconfiginfo
 
