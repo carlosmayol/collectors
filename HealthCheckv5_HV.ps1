@@ -56,11 +56,8 @@ V6.0 (under development, Hyper-V/S2D Clusters 3.0)
 This version is ortiented to collect Hyper-V Cluster nodes & S2D nodes, all the nodes must belong to a cluster. Standalone nodes are not supported.
 
 Pending:
-CSV State
-RDMA
+Host mitigations (side channel)
 QoS (PFC, ETS, QoS)
-Virtual Disk And Physical Disk Data (S2D)
-Events entries for Storage/PnP/Storport
 
 ##########
 Changelog:
@@ -229,6 +226,18 @@ $OutputNetAdpRSS = "$TargetFolder\NetAdpRSS.csv"; If (Test-Path $OutputNetAdpRSS
 $OutputNetAdpRDMA = "$TargetFolder\NetAdpRDMA.csv"; If (Test-Path $OutputNetAdpRDMA) {Remove-Item $OutputNetAdpRDMA -force}
 $OutputNetHW = "$TargetFolder\NetHW.csv"; If (Test-Path $OutputNetHW) {Remove-Item $OutputNetHW -Force}
 $OutputNetAdvProp = "$TargetFolder\NetAdvProp.csv"; If (Test-Path $OutputNetAdvProp) {Remove-Item $OutputNetAdvProp -Force}
+$OutputNetPower = "$TargetFolder\NetPower.csv" ; If (Test-Path $OutputNetPower) {Remove-Item $OutputNetPower -Force}
+$OutputNetBinding = "$TargetFolder\NetBinding.csv" ; If (Test-Path $OutputNetBinding) {Remove-Item $OutputNetBinding -Force}
+$OutputNetRss = "$TargetFolder\NetRss.csv" ; If (Test-Path $OutputNetRss) {Remove-Item $OutputNetRss -Force}
+$OutputNetBIOS = "$TargetFolder\NetBIOS.csv" ; If (Test-Path $OutputNetBIOS) {Remove-Item $OutputNetBIOS -Force}
+$OutputTCPSettings = "$TargetFolder\TCPSetting.csv" ; If (Test-Path $OutputTCPSettings) {Remove-Item $OutputTCPSettings -Force}
+$OutputSmbShare = "$TargetFolder\SmbShare.csv" ; If (Test-Path $OutputSmbShare) {Remove-Item $OutputSmbShare -Force}
+$OutputSmbSrvConfig = "$TargetFolder\SmbSrvConfig.csv" ; If (Test-Path $OutputSmbSrvConfig) {Remove-Item $OutputSmbSrvConfig -Force}
+$OutputSmbCliConfig = "$TargetFolder\SmbCliConfig.csv" ; If (Test-Path $OutputSmbCliConfig) {Remove-Item $OutputSmbCliConfig -Force}
+$OutputSmbCliNets = "$TargetFolder\SmbCliNets.csv" ; If (Test-Path $OutputSmbCliNets) {Remove-Item $OutputSmbCliNets -Force}
+$OutputSmbSession = "$TargetFolder\SmbSession.csv" ; If (Test-Path $OutputSmbSession) {Remove-Item $OutputSmbSession -Force}
+$OutputSmbConn = "$TargetFolder\SmbConn.csv" ; If (Test-Path $OutputSmbConn) {Remove-Item $OutputSmbConn -Force}
+$OutputSmbMulti = "$TargetFolder\SmbMulti.csv" ; If (Test-Path $OutputSmbMulti) {Remove-Item $OutputSmbMulti -Force}
 $OutputLBFO = "$TargetFolder\TeamLBFO.csv"; If (Test-Path $OutputLBFO) {Remove-Item $OutputLBFO -Force}
 $OutputVMSWitch = "$TargetFolder\VMSwitch.csv"; If (Test-Path $OutputVMSWitch) {Remove-Item $OutputVMSWitch -Force}
 $OutputVMSwithTeam = "$TargetFolder\VMSwitchTeam.csv"; If (Test-Path $OutputVMSwithTeam) {Remove-Item $OutputVMSwithTeam -Force}
@@ -459,11 +468,10 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
                         
                         } #End Remote ScriptBlock
 
-                        ##HOST remote PSSession for FileVersion -> Collection the results into the local system
+                        ##HOST remote PSSession for FileVersion -> Collecting the results into the local system
                         $filesresult = Invoke-Command -session $session -ScriptBlock {$fileinfo}
                         $filesresult | Where-Object {$_} | Export-Csv -Path $OutputFiles -Append -NoTypeInformation
                         Remove-PSSession -Session $session
-
 
                         # Hyper-V Host
                         Get-VMHost -ComputerName  $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-csv -Path $OutputVMHost -Append -NoTypeInformation
@@ -474,21 +482,41 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
                         Get-VMHostSupportedVersion -ComputerName  $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-csv -Path $OutputVMHostVersions -Append -NoTypeInformation
 
                         #HOST Mitigations/Hyper-Care
+                        ## PENDING
 
                         # HOST Network
                         Get-Netadapter -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputNetAdapters -Append -NoTypeInformation                    
                         Get-NetAdapter -CimSession $ClusterNode | Where-Object {$_.ifOperStatus -eq "Up"} | Get-NetAdapterAdvancedProperty  | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputNetAdvProp -Append -NoTypeInformation
+                        Get-NetAdapter -CimSession $ClusterNode | Where-Object {$_.ifOperStatus -eq "Up"} | Get-NetAdapterBinding -ErrorAction SilentlyContinue | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, Name, DisplayName, ComponentID, Enabled | Export-Csv -Path $OutputNetBinding -Append -NoTypeInformation
                         Get-NetAdapterRSS -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputNetAdpRSS -Append -NoTypeInformation
                         Get-NetAdapterRDMA -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputNetAdpRDMA -Append -NoTypeInformation
                         Get-NetAdapterHardwareInfo -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}}, @{N="ComputerName";E={$ClusterNode}}, *| Export-Csv -Path $OutputNetHW -Append -NoTypeInformation           
                         Get-NetLbfoTeam -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputLBFO -Append -NoTypeInformation
+                        Get-NetAdapterPowerManagement -CimSession $Clusternode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, Name, SelectiveSuspend, DeviceSleepOnDisconnect, WakeOnMagicPacket, WakeOnPattern  | Export-Csv -Path $OutputNetPower -Append -NoTypeInformation   
+                        Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter IPEnabled=TRUE -ComputerName $Clusternode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, Description, TcpipNetbiosOptions* | Export-Csv -Path $OutputNetBIOS -Append -NoTypeInformation      
+                        Get-NetTCPSetting -CimSession $Clusternode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputTCPSettings -Append -NoTypeInformation
+                        
+                        #Hyper-V Switch
                         Get-VMSwitch -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputVMSWitch -Append -NoTypeInformation
-                        Get-VMSwitch -CimSession $ClusterNode | Get-VMSwitchTeam -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputVMSwithTeam -Append -NoTypeInformation            
+                        Get-VMSwitch -CimSession $ClusterNode | Get-VMSwitchTeam -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, Name, Id, TeamingMode, LoadBalancingAlgorithm, @{N="NetAdapterInterfaceDescription" ;E={$_ | Select-Object * -ExpandProperty NetAdapterInterfaceDescription}}| Export-Csv -Path $OutputVMSwithTeam -Append -NoTypeInformation
                         Get-VMSwitch -CimSession $ClusterNode | Get-VMSwitchExtension -CimSession $ClusterNode | Get-VMSwitchTeam -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputSwitchExt -Append -NoTypeInformation            
                         Get-VMNetworkAdapter -ManagementOS -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputvNIC -Append -NoTypeInformation
                         Get-VMNetworkAdapterAcl -ManagementOS  -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputvNICACL -Append -NoTypeInformation
                         Get-VMNetworkAdapterIsolation -ManagementOS  -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, ** | Export-Csv -Path $OutputvNICIso -Append -NoTypeInformation
                         Get-VMNetworkAdapterVlan -ManagementOS  -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputvNICVlan -Append -NoTypeInformation
+
+                        #SMB Information  
+                        Get-SmbShare -CimSession $ClusterNode | Where-Object {$_.ScopeName -ne "*"} | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputSmbShare -Append -NoTypeInformation   
+                        Get-SmbServerConfiguration -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}},  * | Export-Csv -Path $OutputSmbSrvConfig -Append -NoTypeInformation
+                        Get-SmbClientConfiguration -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputSmbCliConfig -Append -NoTypeInformation
+                        Get-SmbClientNetworkInterface -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputSmbCliNets -Append -NoTypeInformation
+                        Get-SmbSession -CimSession $ClusterNode -SmbInstance CSV | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputSmbSession -Append -NoTypeInformation
+                        Get-SmbSession -CimSession $ClusterNode -SmbInstance SBL | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputSmbSession -Append -NoTypeInformation
+                        Get-SmbConnection -CimSession $ClusterNode -SmbInstance CSV | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputSmbConn -Append -NoTypeInformation
+                        Get-SmbConnection -CimSession $ClusterNode -SmbInstance SBL | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputSmbConn -Append -NoTypeInformation
+                        Get-SmbMultichannelConnection -CimSession $ClusterNode -SmbInstance CSV | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputSmbMulti -Append -NoTypeInformation
+                        Get-SmbMultichannelConnection -CimSession $ClusterNode -SmbInstance CSV | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputSmbMulti -Append -NoTypeInformation
+                        
 
                         # HOST Storage (requires invoked sessions)
                         $physicaldisk = Invoke-Command -ComputerName $ClusterNode -ScriptBlock  {Get-PhysicalDisk} | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}},*
@@ -510,8 +538,6 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
                         $virtualDisk | Export-Csv -Path $OutputvDisk -Append -NoTypeInformation 
                         $Volumes = Invoke-Command -ComputerName $ClusterNode -ScriptBlock {Get-Volume} | Select-Object @{N="Cluster";E={$Cluster}},@{L="ComputerName";E={$ClusterNode}}, *
                         $Volumes| Export-Csv -Path $OutputVolume -Append -NoTypeInformation 
-
-
 
                     } #end collectconfiginfo
 

@@ -257,12 +257,12 @@ $OutputNetBinding = "$TargetFolder\NetBinding.csv" ; If (Test-Path $OutputNetBin
 $OutputNetRss = "$TargetFolder\NetRss.csv" ; If (Test-Path $OutputNetRss) {Remove-Item $OutputNetRss -Force}
 $OutputNetBIOS = "$TargetFolder\NetBIOS.csv" ; If (Test-Path $OutputNetBIOS) {Remove-Item $OutputNetBIOS -Force}
 $OutputTCPSettings = "$TargetFolder\TCPSetting.csv" ; If (Test-Path $OutputTCPSettings) {Remove-Item $OutputTCPSettings -Force}
-$OutputSmbShare = "$TargetFolder\SMBShare.csv" ; If (Test-Path $OutputTCPSettings) {Remove-Item $OutputTCPSettings -Force}
-$OutputSmbSrvConfig = "$TargetFolder\SMBSrvConfig.csv" ; If (Test-Path $OutputTCPSettings) {Remove-Item $OutputTCPSettings -Force}
-$OutputSmbCliConfig = "$TargetFolder\SMBCliConfig.csv" ; If (Test-Path $OutputTCPSettings) {Remove-Item $OutputTCPSettings -Force}
-$OutputSmbCliNets = "$TargetFolder\SmbCliNets.csv" ; If (Test-Path $OutputTCPSettings) {Remove-Item $OutputTCPSettings -Force}
-$OutputSmbSession = "$TargetFolder\SmbSession.csv" ; If (Test-Path $OutputTCPSettings) {Remove-Item $OutputTCPSettings -Force}
-$OutputSmbConn = "$TargetFolder\SmbConn.csv" ; If (Test-Path $OutputTCPSettings) {Remove-Item $OutputTCPSettings -Force}
+$OutputSmbShare = "$TargetFolder\SmbShare.csv" ; If (Test-Path $OutputSmbShare) {Remove-Item $OutputSmbShare -Force}
+$OutputSmbSrvConfig = "$TargetFolder\SmbSrvConfig.csv" ; If (Test-Path $OutputSmbSrvConfig) {Remove-Item $OutputSmbSrvConfig -Force}
+$OutputSmbCliConfig = "$TargetFolder\SmbCliConfig.csv" ; If (Test-Path $OutputSmbCliConfig) {Remove-Item $OutputSmbCliConfig -Force}
+$OutputSmbCliNets = "$TargetFolder\SmbCliNets.csv" ; If (Test-Path $OutputSmbCliNets) {Remove-Item $OutputSmbCliNets -Force}
+$OutputSmbSession = "$TargetFolder\SmbSession.csv" ; If (Test-Path $OutputSmbSession) {Remove-Item $OutputSmbSession -Force}
+$OutputSmbConn = "$TargetFolder\SmbConn.csv" ; If (Test-Path $OutputSmbConn) {Remove-Item $OutputSmbConn -Force}
 
 ### START SERVER LOOP##########################################
 #Iterate through each server in $Servers and run commands below
