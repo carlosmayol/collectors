@@ -412,6 +412,9 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
                         #Cluster
                         $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-FailoverClustering/Operational'; Level=[int]4; starttime=$EventStart; endtime=$EventEnd} -MaxEvents 1000 -ErrorAction SilentlyContinue
                         # Limiting Informational Events to 1K per Node, as faulty nodes creates a huge amount of entries.
+                        # Microsoft-Windows-FailoverClustering-CsvFs/Operational
+                        # Microsoft-Windows-Hyper-V-High-Availability-Admin
+
                         #S2D
                         $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='microsoft-windows-storagespaces-spacemanager/operational'; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue         
                         $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='microsoft-windows-storagespaces-spacemanager/diagnostic'; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue         
@@ -480,6 +483,16 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
                         Get-VMHostNumaNodeStatus -ComputerName  $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-csv -Path $OutputVMHostNumaStatus -Append -NoTypeInformation
                         Get-VMHostPartitionableGpu -ComputerName  $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-csv -Path $OutputVMHostGPU -Append -NoTypeInformation
                         Get-VMHostSupportedVersion -ComputerName  $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-csv -Path $OutputVMHostVersions -Append -NoTypeInformation
+                        
+                        #DUMP setting
+                        # PTE if filter pages
+                        <# PTE LiveDump setting 
+                        reg query "HKLM\Software\Microsoft\Windows\Windows Error Reporting\FullLiveKernelReports" /v SystemThrottleThreshold /t REG_DWORD /d 0 /f
+                        reg add "HKLM\Software\Microsoft\Windows\Windows Error Reporting\FullLiveKernelReports" /v ComponentThrottleThreshold /t REG_DWORD /d 0 /f
+                        reg add "HKLM\Software\Microsoft\Windows\Windows Error Reporting\FullLiveKernelReports" /v FullLiveReportsMax /t REG_DWORD /d 10 /f
+                        reg add "HKLM\SYSTEM\CurrentControlSet\Control\CrashControl" /v AlwaysKeepMemoryDump /t REG_DWORD /d 1 /f
+                        #>
+
 
                         #HOST Mitigations/Hyper-Care
                         ## PENDING
