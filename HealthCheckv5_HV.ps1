@@ -302,10 +302,10 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
             Get-Cluster -Name $Cluster | Select-Object -Property * | Export-Csv -Path $OutputClusteCore -NoTypeInformation -Append
             Get-ClusterNode -Cluster $cluster | Select-Object -Property * | Export-Csv -Path $OutputClusterNodes -NoTypeInformation -Append
             Get-ClusterGroup -Cluster $cluster | Select-Object -Property * | Export-Csv -Path $OutputClusterGroup  -NoTypeInformation -Append
-            Get-ClusterGroup -Cluster $cluster | get-clusterparameter | Select-Object -Property * | Export-Csv -Path $OutputCluster04 -NoTypeInformation -Append
+            Get-ClusterGroup -Cluster $cluster | Get-clusterparameter | Select-Object -Property * | Export-Csv -Path $OutputCluster04 -NoTypeInformation -Append
             Get-ClusterGroup -Cluster $cluster | Get-ClusterOwnerNode | Select-Object -Property ClusterObject -ExpandProperty OwnerNodes | Select-Object -Property * | Export-Csv -Path $OutputClusterGrOwners  -NoTypeInformation -Append
-            Get-ClusterResource -Cluster $cluster | get-clusterparameter | Select-Object -Property * | Export-Csv -Path $OutputClusterRes -NoTypeInformation -Append
-            Get-ClusterResource -Cluster $cluster | Select-Object -Property * | Export-Csv -Path $OutputClusterResAdv  -NoTypeInformation -Append
+            Get-ClusterResource -Cluster $cluster | Select-Object -Property * | Export-Csv -Path $OutputClusterRes  -NoTypeInformation -Append
+            Get-ClusterResource -Cluster $cluster | Get-clusterparameter | Select-Object -Property * | Export-Csv -Path $OutputClusterResAdv -NoTypeInformation -Append
             Get-ClusterResource -Cluster $cluster | Get-ClusterOwnerNode | Select-Object -Property ClusterObject -ExpandProperty OwnerNodes | Select-Object -Property * | Export-Csv -Path $OutputClusterResOwners -NoTypeInformation -Append
             Get-ClusterNetwork -Cluster $cluster | Select-Object -Property * | Export-Csv -Path $OutputClusterNet -NoTypeInformation -Append
             Get-ClusterNetworkInterface -Cluster $cluster | Select-Object -Property * | Export-Csv -Path $OutputClusterNetInt -NoTypeInformation -Append
