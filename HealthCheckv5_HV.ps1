@@ -313,16 +313,7 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
             Get-ClusterSharedVolume -Cluster $cluster | Select-Object -Property * | Export-Csv -Path $OutputClusterCSV -NoTypeInformation -Append
             Get-ClusterSharedVolumeState -Cluster $cluster | Select-Object -Property * | Export-Csv -Path $OutputClusterCSVState -NoTypeInformation -Append
 
-
-            $clusterresources 
-            $clusterresourcesadv | 
-            $clusterresourceownernode 
-            $clusternetwork 
-            $clusternetworkinterface 
-            $clusteraccess 
-            $clusterCSV 
-            $clusterCSVState 
-            #####End Cluster Objects collection & Export process 
+            #####End Cluster Objects collection
 
             if ($CollectClusterLogs) {
             ###Collecting ClusterLogs 
