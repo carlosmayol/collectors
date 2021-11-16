@@ -209,6 +209,7 @@ $OutputClusterNetInt = "$TargetFolder\Cluster-netint.csv"; If (Test-Path $Output
 $OutputClusterAccess = "$TargetFolder\Cluster-access.csv"; If (Test-Path $OutputClusterAccess) {Remove-Item $OutputClusterAccess -Force}
 $OutputClusterS2D = "$TargetFolder\Cluster-S2D.csv" ; If (Test-Path $OutputClusterS2D) {Remove-Item $OutputCluster -Force}
 $OutputClusterCSV = "$TargetFolder\Cluster-CSV.csv"; If (Test-Path $OutputClusterCSV) {Remove-Item $OutputClusterCSV -Force}
+$OutputClusterCSVAdv = "$TargetFolder\Cluster-CSVAdv.csv"; If (Test-Path $OutputClusterCSVAdv) {Remove-Item $OutputClusterCSVAdv -Force}
 $OutputClusterCSVState = "$TargetFolder\Cluster-CSVState.csv"; If (Test-Path $OutputClusterCSVState) {Remove-Item $OutputClusterCSVState -Force}
 $OutputEvents = "$TargetFolder\HostEventInfo.csv"; If (Test-Path $OutputEvents) {Remove-Item $OutputEvents -force}
 $OutputComputerinfo = "$TargetFolder\HostComputerinfo.csv"; If (Test-Path $OutputComputerinfo) {Remove-Item $OutputComputerinfo -force}
@@ -311,6 +312,7 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
             Get-ClusterAccess -Cluster $cluster | Select-Object -Property * | Export-Csv -Path $OutputClusterAccess -NoTypeInformation -Append
             Get-ClusterS2D -CimSession $cluster | Select-Object -Property * | Export-Csv -Path $OutputClusterS2D -NoTypeInformation -Append
             Get-ClusterSharedVolume -Cluster $cluster | Select-Object -Property * | Export-Csv -Path $OutputClusterCSV -NoTypeInformation -Append
+            Get-ClusterSharedVolume -Cluster $cluster | Get-clusterparameter | Select-Object -Property * | Export-Csv -Path $OutputClusterCSVAdv -NoTypeInformation -Append
             Get-ClusterSharedVolumeState -Cluster $cluster | Select-Object -Property * | Export-Csv -Path $OutputClusterCSVState -NoTypeInformation -Append
 
             #####End Cluster Objects collection
