@@ -197,19 +197,19 @@ $files = Get-content $fileList | Where-Object { ($_.Trim() -ne '') -and ($_.Trim
 ##### WRITE OUTPUT FILES, ONE FILE PER COLLECTION #######################################################
 #File to write output, if exists, delete it.
 
-$OutputCluster01 = "$TargetFolder\Cluster-Core.csv"; If (Test-Path $OutputCluster01) {Remove-Item $OutputCluster -Force}
-$OutputCluster02 = "$TargetFolder\Cluster-nodes.csv"; If (Test-Path $OutputCluster02) {Remove-Item $OutputCluster -Force}
-$OutputCluster03 = "$TargetFolder\Cluster-group.csv" ; If (Test-Path $OutputCluster03) {Remove-Item $OutputCluster -Force}
-$OutputCluster04 = "$TargetFolder\Cluster-groupadv.csv" ; If (Test-Path $OutputCluster04) {Remove-Item $OutputCluster -Force}
-$OutputCluster05 = "$TargetFolder\Cluster-groupowners.csv"; If (Test-Path $OutputCluster05) {Remove-Item $OutputCluster -Force}
-$OutputCluster06 = "$TargetFolder\Cluster-res.csv"; If (Test-Path $OutputCluster06) {Remove-Item $OutputCluster -Force}
-$OutputCluster07 = "$TargetFolder\Cluster-resadv.csv"; If (Test-Path $OutputCluster07) {Remove-Item $OutputCluster -Force}
-$OutputCluster08 = "$TargetFolder\Cluster-resowners.csv"; If (Test-Path $OutputCluster08) {Remove-Item $OutputCluster -Force}
-$OutputCluster09 = "$TargetFolder\Cluster-net.csv"; If (Test-Path $OutputCluster09) {Remove-Item $OutputCluster -Force}
-$OutputCluster10 = "$TargetFolder\Cluster-netint.csv"; If (Test-Path $OutputCluster10) {Remove-Item $OutputCluster -Force}
-$OutputCluster11 = "$TargetFolder\Cluster-access.csv"; If (Test-Path $OutputCluster11) {Remove-Item $OutputCluster -Force}
-$OutputCSV = "$TargetFolder\Cluster-CSV.csv"; If (Test-Path $OutputCSV) {Remove-Item $OutputCSV -Force}
-$OutputCSVState = "$TargetFolder\Cluster-CSVState.csv"; If (Test-Path $OutputCSVState) {Remove-Item $OutputCSVState -Force}
+$OutputClusteCore = "$TargetFolder\Cluster-Core.csv"; If (Test-Path $OutputClusteCore) {Remove-Item $OutputClusteCore -Force}
+$OutputClusterNodes = "$TargetFolder\Cluster-nodes.csv"; If (Test-Path $OutputClusterNodes) {Remove-Item $OutputClusterNodes -Force}
+$OutputClusterGroup = "$TargetFolder\Cluster-group.csv" ; If (Test-Path $OutputClusterGroup) {Remove-Item $OutputClusterGroup -Force}
+$OutputClusterGrOwners = "$TargetFolder\Cluster-groupowners.csv"; If (Test-Path $OutputClusterGrOwners) {Remove-Item $OutputClusterGrOwners -Force}
+$OutputClusterRes = "$TargetFolder\Cluster-res.csv"; If (Test-Path $OutputClusterRes) {Remove-Item $OutputClusterRes -Force}
+$OutputClusterResAdv = "$TargetFolder\Cluster-resadv.csv"; If (Test-Path $OutputClusterResAdv) {Remove-Item $OutputClusterResAdv -Force}
+$OutputClusterResOwners = "$TargetFolder\Cluster-resowners.csv"; If (Test-Path $OutputClusterResOwners) {Remove-Item $OutputClusterResOwners -Force}
+$OutputClusterNet = "$TargetFolder\Cluster-net.csv"; If (Test-Path $OutputClusterNet) {Remove-Item $OutputClusterNet -Force}
+$OutputClusterNetInt = "$TargetFolder\Cluster-netint.csv"; If (Test-Path $OutputClusterNetInt) {Remove-Item $OutputClusterNetInt -Force}
+$OutputClusterAccess = "$TargetFolder\Cluster-access.csv"; If (Test-Path $OutputClusterAccess) {Remove-Item $OutputClusterAccess -Force}
+$OutputClusterS2D = "$TargetFolder\Cluster-S2D.csv" ; If (Test-Path $OutputClusterS2D) {Remove-Item $OutputCluster -Force}
+$OutputClusterCSV = "$TargetFolder\Cluster-CSV.csv"; If (Test-Path $OutputClusterCSV) {Remove-Item $OutputClusterCSV -Force}
+$OutputClusterCSVState = "$TargetFolder\Cluster-CSVState.csv"; If (Test-Path $OutputClusterCSVState) {Remove-Item $OutputClusterCSVState -Force}
 $OutputEvents = "$TargetFolder\HostEventInfo.csv"; If (Test-Path $OutputEvents) {Remove-Item $OutputEvents -force}
 $OutputComputerinfo = "$TargetFolder\HostComputerinfo.csv"; If (Test-Path $OutputComputerinfo) {Remove-Item $OutputComputerinfo -force}
 $OutputHotfixes = "$TargetFolder\HostHotfixes.csv"; If (Test-Path $OutputHotfixes) {Remove-Item $OutputHotfixes -Force}
@@ -278,9 +278,9 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
 
         If (Test-Connection -ComputerName $cluster -count 1 -Quiet)
         {
-            Write-Verbose ("Exporting Cluster settings for $cluster...") -Verbose
+            Write-Verbose ("Starting Cluster Collection settings for $cluster...") -Verbose
             Write-Host ""
-            Log-Write -LogPath $sLogFile -LineValue "Exporting Cluster settings for $cluster..." 
+            Log-Write -LogPath $sLogFile -LineValue "Starting Cluster Collection settings for $cluster..." 
 
             #Preparing artifacts for Cluster & Cluster Nodes collection
             #Getting Cluster domain
@@ -297,34 +297,31 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
             Log-Write -LogPath $sLogFile -LineValue "Nodes in cluster $ClusterSrvNodesCount"
 
             #####Start Cluster Objects collection
-            $clustercore = Get-Cluster -Name $Cluster | Select-Object -Property * 
-            $clusternodes = Get-ClusterNode -Cluster $cluster | Select-Object -Property *
-            $clustergroup = Get-ClusterGroup -Cluster $cluster | Select-Object -Property *
-            $clustergroupadv = Get-ClusterGroup -Cluster $cluster | get-clusterparameter | Select-Object -Property *
-            $clustergroupownernode = Get-ClusterGroup -Cluster $cluster | Get-ClusterOwnerNode | Select-Object -Property ClusterObject -ExpandProperty OwnerNodes | Select-Object -Property *
-            $clusterresources = Get-ClusterResource -Cluster $cluster | get-clusterparameter | Select-Object -Property *
-            $clusterresourcesadv = Get-ClusterResource -Cluster $cluster | Select-Object -Property *
-            $clusterresourceownernode = Get-ClusterResource -Cluster $cluster | Get-ClusterOwnerNode | Select-Object -Property ClusterObject -ExpandProperty OwnerNodes | Select-Object -Property *
-            $clusternetwork = Get-ClusterNetwork -Cluster $cluster | Select-Object -Property *
-            $clusternetworkinterface = Get-ClusterNetworkInterface -Cluster $cluster | Select-Object -Property *
-            $clusteraccess = Get-ClusterAccess -Cluster $cluster | Select-Object -Property *
-            $clusterCSV = Get-ClusterSharedVolume -Cluster $cluster | Select-Object -Property *
-            $clusterCSVState =Get-ClusterSharedVolumeState -Cluster $cluster | Select-Object -Property *
+            
+            Get-Cluster -Name $Cluster | Select-Object -Property * | Export-Csv -Path $OutputClusteCore -NoTypeInformation -Append
+            Get-ClusterNode -Cluster $cluster | Select-Object -Property * | Export-Csv -Path $OutputClusterNodes -NoTypeInformation -Append
+            Get-ClusterGroup -Cluster $cluster | Select-Object -Property * | Export-Csv -Path $OutputClusterGroup  -NoTypeInformation -Append
+            Get-ClusterGroup -Cluster $cluster | get-clusterparameter | Select-Object -Property * | Export-Csv -Path $OutputCluster04 -NoTypeInformation -Append
+            Get-ClusterGroup -Cluster $cluster | Get-ClusterOwnerNode | Select-Object -Property ClusterObject -ExpandProperty OwnerNodes | Select-Object -Property * | Export-Csv -Path $OutputClusterGrOwners  -NoTypeInformation -Append
+            Get-ClusterResource -Cluster $cluster | get-clusterparameter | Select-Object -Property * | Export-Csv -Path $OutputClusterRes -NoTypeInformation -Append
+            Get-ClusterResource -Cluster $cluster | Select-Object -Property * | Export-Csv -Path $OutputClusterResAdv  -NoTypeInformation -Append
+            Get-ClusterResource -Cluster $cluster | Get-ClusterOwnerNode | Select-Object -Property ClusterObject -ExpandProperty OwnerNodes | Select-Object -Property * | Export-Csv -Path $OutputClusterResOwners -NoTypeInformation -Append
+            Get-ClusterNetwork -Cluster $cluster | Select-Object -Property * | Export-Csv -Path $OutputClusterNet -NoTypeInformation -Append
+            Get-ClusterNetworkInterface -Cluster $cluster | Select-Object -Property * | Export-Csv -Path $OutputClusterNetInt -NoTypeInformation -Append
+            Get-ClusterAccess -Cluster $cluster | Select-Object -Property * | Export-Csv -Path $OutputClusterAccess -NoTypeInformation -Append
+            Get-ClusterS2D -CimSession $cluster | Select-Object -Property * | Export-Csv -Path $OutputClusterS2D -NoTypeInformation -Append
+            Get-ClusterSharedVolume -Cluster $cluster | Select-Object -Property * | Export-Csv -Path $OutputClusterCSV -NoTypeInformation -Append
+            Get-ClusterSharedVolumeState -Cluster $cluster | Select-Object -Property * | Export-Csv -Path $OutputClusterCSVState -NoTypeInformation -Append
 
-            #Exporting Cluster Objects & appending results if more than one cluster is collected.
-            $clustercore | Export-Csv -Path $OutputCluster01 -NoTypeInformation -Append
-            $clusternodes | Export-Csv -Path $OutputCluster02 -NoTypeInformation -Append
-            $clustergroup | Export-Csv -Path $OutputCluster03 -NoTypeInformation -Append
-            $clustergroupadv | Export-Csv -Path $OutputCluster04 -NoTypeInformation -Append
-            $clustergroupownernode | Export-Csv -Path $OutputCluster05 -NoTypeInformation -Append
-            $clusterresources | Export-Csv -Path $OutputCluster06 -NoTypeInformation -Append
-            $clusterresourcesadv | Export-Csv -Path $OutputCluster07 -NoTypeInformation -Append
-            $clusterresourceownernode | Export-Csv -Path $OutputCluster08 -NoTypeInformation -Append
-            $clusternetwork | Export-Csv -Path $OutputCluster09 -NoTypeInformation -Append
-            $clusternetworkinterface | Export-Csv -Path $OutputCluster10 -NoTypeInformation -Append
-            $clusteraccess | Export-Csv -Path $OutputCluster11 -NoTypeInformation -Append
-            $clusterCSV | Export-Csv -Path $OutputCSV -NoTypeInformation -Append
-            $clusterCSVState | Export-Csv -Path $OutputCSVState -NoTypeInformation -Append
+
+            $clusterresources 
+            $clusterresourcesadv | 
+            $clusterresourceownernode 
+            $clusternetwork 
+            $clusternetworkinterface 
+            $clusteraccess 
+            $clusterCSV 
+            $clusterCSVState 
             #####End Cluster Objects collection & Export process 
 
             if ($CollectClusterLogs) {
