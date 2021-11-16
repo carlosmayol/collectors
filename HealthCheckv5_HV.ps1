@@ -410,10 +410,8 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
                         $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-SMBServer/Operational'; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue
                         $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-SMBServer/Security'; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue                       
                         #Cluster
-                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-FailoverClustering/Operational'; Level=[int]4; starttime=$EventStart; endtime=$EventEnd} -MaxEvents 1000 -ErrorAction SilentlyContinue
+                        $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='Microsoft-Windows-FailoverClustering/Operational'; Level=[int]4; starttime=$EventStart; endtime=$EventEnd} -MaxEvents 1000 -ErrorAction SilentlyContinue                       
                         # Limiting Informational Events to 1K per Node, as faulty nodes creates a huge amount of entries.
-                        # Microsoft-Windows-FailoverClustering-CsvFs/Operational
-                        # Microsoft-Windows-Hyper-V-High-Availability-Admin
 
                         #S2D
                         $Events += Get-WinEvent -Oldest  -ComputerName $ClusterNode -FilterHashtable @{LogName='microsoft-windows-storagespaces-spacemanager/operational'; starttime=$EventStart; endtime=$EventEnd} -ErrorAction SilentlyContinue         
@@ -450,7 +448,8 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
                             $fileinfo = $null
                             $fileinfo = @();
                             
-                            Add-Member -InputObject $fileinfo -MemberType NoteProperty -Name Server -Value ""
+                            Add-Member -InputObject $fileinfo -MemberType NoteProperty -Name Cluster -Value ""
+                            Add-Member -InputObject $fileinfo -MemberType NoteProperty -Name ComputerName -Value ""
                             Add-Member -InputObject $fileinfo -MemberType NoteProperty -Name Name -Value ""
                             Add-Member -InputObject $fileinfo -MemberType NoteProperty -Name FileVersion -Value ""
                             Add-Member -InputObject $fileinfo -MemberType NoteProperty -Name SHA2Hash -value ""
@@ -465,7 +464,7 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
                             $sha2Hash = $sha2Hash.Replace("-", "")
 
                             #ErrorAction is set to silentContinue in case a file defined in the txt does not exist in the system
-                            $fileinfo += get-item $file  -ErrorAction SilentlyContinue | Select-Object @{N="Server";E={$env:COMPUTERNAME}},Name,@{N="FileVersion";E={"$($_.VersionInfo.FileMajorPart).$($_.VersionInfo.FileMinorPart).$($_.VersionInfo.FileBuildPart).$($_.VersionInfo.FilePrivatePart)"}},@{N="SHA2Hash";E={$sha2Hash}}
+                            $fileinfo += get-item $file  -ErrorAction SilentlyContinue | Select-Object @{N="Cluster";E={(Get-Cluster).Name}},@{N="ComputerName";E={$env:COMPUTERNAME}},Name,@{N="FileVersion";E={"$($_.VersionInfo.FileMajorPart).$($_.VersionInfo.FileMinorPart).$($_.VersionInfo.FileBuildPart).$($_.VersionInfo.FilePrivatePart)"}},@{N="SHA2Hash";E={$sha2Hash}}
 
                             } #End foreach file collection
                         
@@ -493,8 +492,8 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
                         reg add "HKLM\SYSTEM\CurrentControlSet\Control\CrashControl" /v AlwaysKeepMemoryDump /t REG_DWORD /d 1 /f
                         #>
 
-
                         #HOST Mitigations/Hyper-Care
+                        #Host Protections (Secure-Core) DG/CG/CIPolicies -> HOSTComputerInfo
                         ## PENDING
 
                         # HOST Network
@@ -529,7 +528,6 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
                         Get-SmbConnection -CimSession $ClusterNode -SmbInstance SBL | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputSmbConn -Append -NoTypeInformation
                         Get-SmbMultichannelConnection -CimSession $ClusterNode -SmbInstance CSV | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputSmbMulti -Append -NoTypeInformation
                         Get-SmbMultichannelConnection -CimSession $ClusterNode -SmbInstance CSV | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputSmbMulti -Append -NoTypeInformation
-                        
 
                         # HOST Storage (requires invoked sessions)
                         $physicaldisk = Invoke-Command -ComputerName $ClusterNode -ScriptBlock  {Get-PhysicalDisk} | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}},*
