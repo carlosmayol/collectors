@@ -295,20 +295,20 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
 
             #####Start Cluster Objects collection
             # ADD ClusterName & ClusterNode
-            Get-Cluster -Name $Cluster | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputClusteCore -NoTypeInformation -Append
-            Get-ClusterNode -Cluster $cluster | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputClusterNodes -NoTypeInformation -Append
-            Get-ClusterGroup -Cluster $cluster | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputClusterGroup  -NoTypeInformation -Append
-            Get-ClusterGroup -Cluster $cluster | Get-ClusterOwnerNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * , @{N="OwnerNodes";E={ $_ | Select-Object * -ExpandProperty OwnerNodes}} | Export-Csv -Path $OutputClusterGrOwners -NoTypeInformation -Append
-            Get-ClusterResource -Cluster $cluster | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputClusterRes  -NoTypeInformation -Append
-            Get-ClusterResource -Cluster $cluster | Get-clusterparameter | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputClusterResAdv -NoTypeInformation -Append
-            Get-ClusterResource -Cluster $cluster | Get-ClusterOwnerNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * , @{N="OwnerNodes";E={ $_ | Select-Object * -ExpandProperty OwnerNodes}} | Export-Csv -Path $OutputClusterResOwners -NoTypeInformation -Append
-            Get-ClusterNetwork -Cluster $cluster | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputClusterNet -NoTypeInformation -Append
-            Get-ClusterNetworkInterface -Cluster $cluster | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, *  | Export-Csv -Path $OutputClusterNetInt -NoTypeInformation -Append
-            Get-ClusterAccess -Cluster $cluster | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, *  | Export-Csv -Path $OutputClusterAccess -NoTypeInformation -Append
-            Get-ClusterS2D -CimSession $cluster | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, *  | Export-Csv -Path $OutputClusterS2D -NoTypeInformation -Append
-            Get-ClusterSharedVolume -Cluster $cluster | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputClusterCSV -NoTypeInformation -Append
-            Get-ClusterSharedVolume -Cluster $cluster | Get-clusterparameter | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputClusterCSVAdv -NoTypeInformation -Append
-            Get-ClusterSharedVolumeState -Cluster $cluster | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputClusterCSVState -NoTypeInformation -Append
+            Get-Cluster -Name $Cluster | Select-Object @{N="Cluster";E={$Cluster}}, * | Export-Csv -Path $OutputClusteCore -NoTypeInformation -Append
+            Get-ClusterNode -Cluster $cluster | Select-Object @{N="Cluster";E={$Cluster}}, * | Export-Csv -Path $OutputClusterNodes -NoTypeInformation -Append
+            Get-ClusterGroup -Cluster $cluster | Select-Object @{N="Cluster";E={$Cluster}}, * | Export-Csv -Path $OutputClusterGroup  -NoTypeInformation -Append
+            Get-ClusterGroup -Cluster $cluster | Get-ClusterOwnerNode | Select-Object @{N="Cluster";E={$Cluster}}, ClusterObject , @{N="OwnerNodes";E={ $_ | Select-Object * -ExpandProperty OwnerNodes}} | Export-Csv -Path $OutputClusterGrOwners -NoTypeInformation -Append
+            Get-ClusterResource -Cluster $cluster | Select-Object @{N="Cluster";E={$Cluster}}, * | Export-Csv -Path $OutputClusterRes  -NoTypeInformation -Append
+            Get-ClusterResource -Cluster $cluster | Get-clusterparameter | Select-Object @{N="Cluster";E={$Cluster}}, * | Export-Csv -Path $OutputClusterResAdv -NoTypeInformation -Append
+            Get-ClusterResource -Cluster $cluster | Get-ClusterOwnerNode | Select-Object @{N="Cluster";E={$Cluster}}, ClusterObject , @{N="OwnerNodes";E={ $_ | Select-Object * -ExpandProperty OwnerNodes}} | Export-Csv -Path $OutputClusterResOwners -NoTypeInformation -Append
+            Get-ClusterNetwork -Cluster $cluster | Select-Object @{N="Cluster";E={$Cluster}}, * | Export-Csv -Path $OutputClusterNet -NoTypeInformation -Append
+            Get-ClusterNetworkInterface -Cluster $cluster | Select-Object @{N="Cluster";E={$Cluster}}, *  | Export-Csv -Path $OutputClusterNetInt -NoTypeInformation -Append
+            Get-ClusterAccess -Cluster $cluster | Select-Object @{N="Cluster";E={$Cluster}}, *  | Export-Csv -Path $OutputClusterAccess -NoTypeInformation -Append
+            Get-ClusterS2D -CimSession $cluster | Select-Object @{N="Cluster";E={$Cluster}}, *  | Export-Csv -Path $OutputClusterS2D -NoTypeInformation -Append
+            Get-ClusterSharedVolume -Cluster $cluster | Select-Object @{N="Cluster";E={$Cluster}}, * | Export-Csv -Path $OutputClusterCSV -NoTypeInformation -Append
+            Get-ClusterSharedVolume -Cluster $cluster | Get-clusterparameter | Select-Object @{N="Cluster";E={$Cluster}}, * | Export-Csv -Path $OutputClusterCSVAdv -NoTypeInformation -Append
+            Get-ClusterSharedVolumeState -Cluster $cluster | Select-Object @{N="Cluster";E={$Cluster}}, * | Export-Csv -Path $OutputClusterCSVState -NoTypeInformation -Append
 
             #####End Cluster Objects collection
 
