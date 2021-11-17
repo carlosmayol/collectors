@@ -219,6 +219,7 @@ $OutputVMHostNumaStatus  = "$TargetFolder\VMHostNumaStatus.csv"; If (Test-Path $
 $OutputVMHostGPU  = "$TargetFolder\VMHostGPU.csv"; If (Test-Path $OutputVMHostGPU) {Remove-Item $OutputVMHostGPU -Force}
 $OutputVMHostVersions = "$TargetFolder\VMHostVersions.csv"; If (Test-Path $OutputVMHostVersions) {Remove-Item $OutputVMHostVersions -Force}
 $OutputNetAdapters = "$TargetFolder\NetAdapters.csv"; If (Test-Path $OutputNetAdapters) {Remove-Item $OutputNetAdapters -force}
+$OutputNetIP = "$TargetFolder\NetAdaptersIP.csv"; If (Test-Path $OutputNetIP) {Remove-Item $OutputNetIP -force}
 $OutputNetAdpRSS = "$TargetFolder\NetAdpRSS.csv"; If (Test-Path $OutputNetAdpRSS) {Remove-Item $OutputNetAdpRSS -force}
 $OutputNetAdpRDMA = "$TargetFolder\NetAdpRDMA.csv"; If (Test-Path $OutputNetAdpRDMA) {Remove-Item $OutputNetAdpRDMA -force}
 $OutputNetHW = "$TargetFolder\NetHW.csv"; If (Test-Path $OutputNetHW) {Remove-Item $OutputNetHW -Force}
@@ -482,7 +483,8 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
                         ## PENDING
 
                         # HOST Network
-                        Get-Netadapter -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputNetAdapters -Append -NoTypeInformation                    
+                        Get-Netadapter -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputNetAdapters -Append -NoTypeInformation
+                        Get-NetIPConfiguration -CimSession $ClusterNode -Detailed | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputNetIP -Append -NoTypeInformation                    
                         Get-NetAdapter -CimSession $ClusterNode | Where-Object {$_.ifOperStatus -eq "Up"} | Get-NetAdapterAdvancedProperty  | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputNetAdvProp -Append -NoTypeInformation
                         Get-NetAdapter -CimSession $ClusterNode | Where-Object {$_.ifOperStatus -eq "Up"} | Get-NetAdapterBinding -ErrorAction SilentlyContinue | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, Name, DisplayName, ComponentID, Enabled | Export-Csv -Path $OutputNetBinding -Append -NoTypeInformation
                         Get-NetAdapterRSS -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputNetAdpRSS -Append -NoTypeInformation
