@@ -229,6 +229,7 @@ $OutputNetAdvProp = "$TargetFolder\NetAdvProp.csv"; If (Test-Path $OutputNetAdvP
 $OutputNetPower = "$TargetFolder\NetPower.csv" ; If (Test-Path $OutputNetPower) {Remove-Item $OutputNetPower -Force}
 $OutputNetBinding = "$TargetFolder\NetBinding.csv" ; If (Test-Path $OutputNetBinding) {Remove-Item $OutputNetBinding -Force}
 $OutputNetBIOS = "$TargetFolder\NetBIOS.csv" ; If (Test-Path $OutputNetBIOS) {Remove-Item $OutputNetBIOS -Force}
+$OutputNetLBFO = "$TargetFolder\NetLBFO.csv"; If (Test-Path $OutputNetLBFO) {Remove-Item $OutputNetLBFO -Force}
 $OutputTCPSettings = "$TargetFolder\TCPSetting.csv" ; If (Test-Path $OutputTCPSettings) {Remove-Item $OutputTCPSettings -Force}
 $OutputSmbShare = "$TargetFolder\SmbShare.csv" ; If (Test-Path $OutputSmbShare) {Remove-Item $OutputSmbShare -Force}
 $OutputSmbSrvConfig = "$TargetFolder\SmbSrvConfig.csv" ; If (Test-Path $OutputSmbSrvConfig) {Remove-Item $OutputSmbSrvConfig -Force}
@@ -237,7 +238,6 @@ $OutputSmbCliNets = "$TargetFolder\SmbCliNets.csv" ; If (Test-Path $OutputSmbCli
 $OutputSmbSession = "$TargetFolder\SmbSession.csv" ; If (Test-Path $OutputSmbSession) {Remove-Item $OutputSmbSession -Force}
 $OutputSmbConn = "$TargetFolder\SmbConn.csv" ; If (Test-Path $OutputSmbConn) {Remove-Item $OutputSmbConn -Force}
 $OutputSmbMulti = "$TargetFolder\SmbMulti.csv" ; If (Test-Path $OutputSmbMulti) {Remove-Item $OutputSmbMulti -Force}
-$OutputLBFO = "$TargetFolder\TeamLBFO.csv"; If (Test-Path $OutputLBFO) {Remove-Item $OutputLBFO -Force}
 $OutputVMSWitch = "$TargetFolder\VMSwitch.csv"; If (Test-Path $OutputVMSWitch) {Remove-Item $OutputVMSWitch -Force}
 $OutputVMSwithTeam = "$TargetFolder\VMSwitchTeam.csv"; If (Test-Path $OutputVMSwithTeam) {Remove-Item $OutputVMSwithTeam -Force}
 $OutputSwitchExt = "$TargetFolder\VMSwitchExt.csv"; If (Test-Path $OutputSwitchExt) {Remove-Item $OutputSwitchExt -Force}
@@ -494,7 +494,7 @@ $OutputVolume = "$TargetFolder\Storagevolume.csv"; If (Test-Path $OutputVolume) 
                         Get-NetAdapterVmqQueue -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputNetAdpVMQQueue -Append -NoTypeInformation
                         Get-NetAdapterRDMA -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputNetAdpRDMA -Append -NoTypeInformation
                         Get-NetAdapterHardwareInfo -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}}, @{N="ComputerName";E={$ClusterNode}}, *| Export-Csv -Path $OutputNetHW -Append -NoTypeInformation           
-                        Get-NetLbfoTeam -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputLBFO -Append -NoTypeInformation
+                        Get-NetLbfoTeam -CimSession $ClusterNode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputNetLBFO -Append -NoTypeInformation
                         Get-NetAdapterPowerManagement -CimSession $Clusternode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, Name, SelectiveSuspend, DeviceSleepOnDisconnect, WakeOnMagicPacket, WakeOnPattern  | Export-Csv -Path $OutputNetPower -Append -NoTypeInformation   
                         Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter IPEnabled=TRUE -ComputerName $Clusternode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, Description, TcpipNetbiosOptions* | Export-Csv -Path $OutputNetBIOS -Append -NoTypeInformation      
                         Get-NetTCPSetting -CimSession $Clusternode | Select-Object @{N="Cluster";E={$Cluster}},@{N="ComputerName";E={$ClusterNode}}, * | Export-Csv -Path $OutputTCPSettings -Append -NoTypeInformation
